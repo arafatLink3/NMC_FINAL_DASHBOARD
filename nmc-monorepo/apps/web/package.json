@@ -1,0 +1,36 @@
+{
+  "name": "@nmc/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "NMC Dashboard — React 18 SPA (Vite). Ports the legacy NMC Dashboard UI to a typed monorepo.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@nmc/ai": "workspace:*",
+    "@nmc/api-client": "workspace:*",
+    "@nmc/store": "workspace:*",
+    "@nmc/ui": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "jsdom": "^25.0.0",
+    "typescript": "5.5.4",
+    "vite": "^5.4.5",
+    "vitest": "^2.1.1"
+  }
+}

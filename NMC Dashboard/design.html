@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NMC Portal — Design Blueprint</title>
+<link rel="stylesheet" href="css/theme.css" />
+<style>
+  body{font-family:Inter,Segoe UI,system-ui,Arial,sans-serif;background:#0b1220;color:#e6edf7;margin:0}
+  .wrap{max-width:1280px;margin:auto;padding:24px}
+  h1{font-size:28px;margin:0 0 8px}
+  h2{margin:24px 0 12px;font-size:20px;border-left:4px solid #4f8cff;padding-left:10px}
+  h3{font-size:15px;color:#9bb1d6;margin:18px 0 6px}
+  .lead{color:#9bb1d6}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .card{background:#121a2b;border:1px solid #1f2a44;border-radius:12px;padding:14px}
+  .swatch{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .swatch i{width:22px;height:22px;border-radius:6px;display:inline-block;border:1px solid #1f2a44}
+  ul li{margin:4px 0;color:#cdd6e3}
+  code,pre{background:#0a0f1c;color:#9bb1d6;border:1px solid #1f2a44;border-radius:6px;padding:2px 6px}
+  pre{padding:12px;overflow:auto}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#1f2a44;color:#9bb1d6;font-size:12px;margin:2px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #1f2a44;padding:6px 8px;font-size:13px;text-align:left}
+  th{background:#16223a}
+  .mock{background:#0e1626;border:1px dashed #2a3a5e;border-radius:10px;padding:14px;margin:8px 0}
+  .mock h4{margin:0 0 8px;font-size:13px;color:#9bb1d6}
+  .col2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:780px){.col2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>NMC Portal — Design &amp; Structure Blueprint</h1>
+  <p class="lead">Single-page reference of the visual layout, navigation, sections, color system, data model, and AI logic. The runtime portal is <code>index.html</code> + <code>js/app.js</code> + <code>css/theme.css</code>.</p>
+
+  <h2>1. Global Layout</h2>
+  <div class="mock">
+    <h4>Header (top)</h4>
+    <div>[☰] <b>NMC Portal</b> &nbsp; | &nbsp; Home &nbsp; About &nbsp; Contact &nbsp; | &nbsp; <i>Shift: Morning (08:00–16:00) — On Duty: Arafat, Khaled</i> &nbsp; | &nbsp; 🔔(3) &nbsp; 👤 Engineer</div>
+    <h4>Side Notification Drawer (right slide-in)</h4>
+    <div>CCB window starts in 25m • NTTN SCR-#4421 down 12m • Weekly report due Sun 23:00</div>
+    <h4>Sidebar (left)</h4>
+    <div>
+      <div class="pill">Dashboard</div>
+      <div class="pill">Tickets</div>
+      <div class="pill">Incident Log</div>
+      <div class="pill">Mail Center</div>
+      <div class="pill">Contacts</div>
+      <div class="pill">BRAS DB</div>
+      <div class="pill">Duty Roster</div>
+      <div class="pill">NMS Links</div>
+      <div class="pill">CCB / NCR / PID</div>
+      <div class="pill">Reports</div>
+      <div class="pill">Settings</div>
+    </div>
+    <h4>Main Area</h4>
+    <div>Page content (one of the sections below).</div>
+  </div>
+
+  <h2>2. Color &amp; Theme</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Primary</h3>
+      <div class="swatch"><i style="background:#4f8cff"></i> Primary #4F8CFF</div>
+      <div class="swatch"><i style="background:#6ad29c"></i> Success #6AD29C</div>
+      <div class="swatch"><i style="background:#ffb454"></i> Warning #FFB454</div>
+      <div class="swatch"><i style="background:#ff6b6b"></i> Danger #FF6B6B</div>
+      <div class="swatch"><i style="background:#9bb1d6"></i> Muted #9BB1D6</div>
+    </div>
+    <div class="card">
+      <h3>Surfaces</h3>
+      <div class="swatch"><i style="background:#0b1220"></i> BG #0B1220</div>
+      <div class="swatch"><i style="background:#121a2b"></i> Card #121A2B</div>
+      <div class="swatch"><i style="background:#16223a"></i> Header #16223A</div>
+      <div class="swatch"><i style="background:#1f2a44"></i> Border #1F2A44</div>
+    </div>
+    <div class="card">
+      <h3>Typography</h3>
+      <div>Headings: Inter 600</div>
+      <div>Body: Inter 400</div>
+      <div>Code: JetBrains Mono / Consolas</div>
+    </div>
+  </div>
+
+  <h2>3. Section Map (Sidebar → Page)</h2>
+  <table>
+    <tr><th>Menu</th><th>Sub Sections</th><th>Key Data</th></tr>
+    <tr><td>Dashboard</td><td>KPI cards, Trend chart, Pie (Category), Top Zones, Open Tickets, 1-hr reminders</td><td>incidents[], tickets[]</td></tr>
+    <tr><td>Tickets</td><td>Create Ticket, Close Ticket, AI Chatbox, WhatsApp share, Incident-of-the-month sync</td><td>tickets, incidents</td></tr>
+    <tr><td>Incident Log</td><td>Filter by Zone/Category/Date/Status, Editable table, RCA fields</td><td>incidents</td></tr>
+    <tr><td>Mail Center</td><td>NTTN, IIG, Telco POP, BRAS bandwidth, Weekly, Monthly</td><td>mailLog</td></tr>
+    <tr><td>Contacts</td><td>Global search, AI suggestion, bulk Excel import, Categories</td><td>contacts</td></tr>
+    <tr><td>BRAS DB</td><td>MikroTik list, ping test, service-agent lookup</td><td>bras</td></tr>
+    <tr><td>Duty Roster</td><td>NMC/BNOC/NGNC/NCSS/Survey/Power shift grid, collision logic</td><td>rosters</td></tr>
+    <tr><td>NMS Links</td><td>WhatsUpGold, Zabbix, Cacti, Corero, Nexusguard, NCE-IP, Fastnetmon, Observium, CMS</td><td>nmsLinks</td></tr>
+    <tr><td>CCB / NCR / PID</td><td>Upcoming, Active, Expired, Add manually, Outlook import</td><td>ccbEvents</td></tr>
+    <tr><td>Reports</td><td>Weekly (auto Sun), Monthly (auto month-end), manual run, export</td><td>reports</td></tr>
+    <tr><td>Settings</td><td>Shift config, Escalation matrix, Mail signature, Outlook account, Backup</td></tr>
+  </table>
+
+  <h2>4. Ticket Module — Field Mapping</h2>
+  <table>
+    <tr><th>Ticket text</th><th>Incident-of-the-month column</th></tr>
+    <tr><td>Category:</td><td>Incident Sub-Category</td></tr>
+    <tr><td>BTS/Area:</td><td>Incident Name</td></tr>
+    <tr><td>Impacted Customers (IC): N</td><td>Impacted Client = N; Service Impacted = YES if N&gt;0 else 0</td></tr>
+    <tr><td>Fault Time:</td><td>Fault Time</td></tr>
+    <tr><td>TT:</td><td>Ticket ID</td></tr>
+    <tr><td>(default)</td><td>Current Status = Running</td></tr>
+    <tr><td>Date = today</td><td>Date</td></tr>
+    <tr><td>Session = from Roster at Fault Time</td><td>Session, Name (acting engineer)</td></tr>
+    <tr><td>AI classify(Category)</td><td>Incident Category, Issue Type, Forward Department, Responsible Team</td></tr>
+  </table>
+
+  <h2>5. AI Logic (rule-engine, no subscription)</h2>
+  <div class="card">
+    <h3>5.1 Forward Department / Responsible Team</h3>
+    <pre>FO / Fiber / NTTN / Last mile       → NCSS
+NTTN capacity / NTTN end / SCL/F@H   → Survey & Transmission
+Telco POP / BL POP / GP POP / STL    → Survey & Transmission
+BTS down / Power / Surecom           → BTS & Power Infrastructure
+Router / Switch / IIG / Upstream / PNI / NIX / Traffic / BGP / OSPF → NGNC
+BRAS / Dist BRAS / OLT / ONU (logical) / PON → BNOC
+IPTSB / I&I / Other                  → Manual select
+</pre>
+    <h3>5.2 AI Chatbox</h3>
+    <ul>
+      <li>Parses pasted ticket text → fills form automatically</li>
+      <li>Suggests Category, Sub-Category, Department</li>
+      <li>Learns from manual overrides (stored in <code>aiTraining</code> localStorage)</li>
+      <li>Suggest contact by fuzzy match on BTS/Area string</li>
+    </ul>
+    <h3>5.3 Contact AI</h3>
+    <ul>
+      <li>Input: free text (e.g. "CTG", "DHK-Dhanmondi", "BL_Sonagazi")</li>
+      <li>Output: ranked list — exact match &gt; zone match &gt; substring &gt; AI learned</li>
+      <li>User feedback (👍/👎) reinforces the model</li>
+    </ul>
+  </div>
+
+  <h2>6. Data Model (localStorage keys)</h2>
+  <table>
+    <tr><th>Key</th><th>Shape</th></tr>
+    <tr><td>nmc.contacts</td><td>{name, role, dept, zone, district, level, phone, email, tags[]}</td></tr>
+    <tr><td>nmc.bras</td><td>{zone, district, bts, serviceAgent, brasName, loopback, contact}</td></tr>
+    <tr><td>nmc.scr</td><td>{provider, area, scrId, capacity, linkType}</td></tr>
+    <tr><td>nmc.rosters</td><td>{dept, name, date, shift}</td></tr>
+    <tr><td>nmc.tickets</td><td>{id, rawText, category, bts, ic, faultTime, tt, status, ...}</td></tr>
+    <tr><td>nmc.incidents</td><td>full row of Incident-of-the-month</td></tr>
+    <tr><td>nmc.ccb</td><td>{type:'CCB'|'NCR'|'PID', title, area, start, end, source, status}</td></tr>
+    <tr><td>nmc.aiTraining</td><td>{[category]: dept}</td></tr>
+    <tr><td>nmc.mailLog</td><td>{to, subject, body, sentAt, template}</td></tr>
+    <tr><td>nmc.notifications</td><td>{id, text, type, createdAt, read}</td></tr>
+  </table>
+
+  <h2>7. Mail Templates</h2>
+  <ul>
+    <li><b>NTTN Query</b> (SCL/F@H via portal — auto-prefilled URL; other NTTN — mailto: with body)</li>
+    <li><b>IIG Down / Traffic Fall</b> (laser + ping + cacti graph attach note)</li>
+    <li><b>Telco POP Mail</b> (GP/BL/STL — power check)</li>
+    <li><b>BRAS Bandwidth Zonewise</b> (Night — 3 Excel exports)</li>
+    <li><b>Weekly Report</b> (auto Sun night)</li>
+    <li><b>Monthly Report</b> (auto last day night)</li>
+  </ul>
+
+  <h2>8. CCB / NCR / PID Logic</h2>
+  <ol>
+    <li>Outlook mailbox → IMAP/Graph polling <i>(optional add-on)</i>, or manual add with parsed fields</li>
+    <li>Dashboard shows items whose <b>now &lt; end</b> + status Active</li>
+    <li>When <b>now &gt; end</b>: status → <b>Expired</b>, banner asks "Still ongoing?" → Yes reopens, No closes</li>
+    <li>Expired items go to history, available in Reports → "CCB/NCR Log"</li>
+  </ol>
+
+  <h2>9. WhatsApp Sharing</h2>
+  <div>Use <code>https://wa.me/&lt;group-invite&gt;?text=&lt;encoded&gt;</code> link to push to a group. For automation (wa-automate / open-wa) the portal exposes a "Send to WhatsApp" button that opens wa.me with pre-filled text. Optional backend worker can call a self-hosted wa-bot. No subscription required for the link-share model.</div>
+
+  <h2>10. File Tree</h2>
+  <pre>NMC Dashboard/
+├─ index.html              ← SPA entry
+├─ design.html             ← this file
+├─ css/
+│  └─ theme.css
+├─ js/
+│  ├─ app.js               ← bootstrap + router
+│  ├─ ai.js                ← rule engine + contact AI
+│  ├─ store.js             ← localStorage wrapper
+│  ├─ excel.js             ← xlsx import/export
+│  ├─ pages/
+│  │  ├─ dashboard.js
+│  │  ├─ tickets.js
+│  │  ├─ incidentLog.js
+│  │  ├─ mail.js
+│  │  ├─ contacts.js
+│  │  ├─ bras.js
+│  │  ├─ roster.js
+│  │  ├─ nms.js
+│  │  ├─ ccb.js
+│  │  ├─ reports.js
+│  │  └─ settings.js
+│  └─ components/
+│     ├─ notif.js
+│     └─ table.js
+├─ data/
+│  ├─ seed-contacts.json
+│  ├─ seed-bras.json
+│  ├─ seed-scr.json
+│  └─ seed-roster.json
+└─ assets/
+   ├─ logo.svg
+   └─ excel-template-contacts.csv
+</pre>
+
+  <h2>11. Open the live portal</h2>
+  <p>Open <code>index.html</code> in any modern browser (Chrome/Edge). All data persists in <code>localStorage</code>. To go live, host the folder on IIS / nginx / python http.server — no backend, no subscription.</p>
+</div>
+</body>
+</html>

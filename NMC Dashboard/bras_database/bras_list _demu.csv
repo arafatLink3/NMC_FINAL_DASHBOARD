@@ -1,0 +1,11 @@
+﻿SL,BRAS Name,Loopback,Zone,SA Team Leader,Service Agent Name,Service Agent contact number,Commission,NTTN,SCR ID,MIS Branch Name
+1,BANCHARAMPUR_BTS_DIST_BRAS_01,10.20.231.9,Dhaka/Dhaka Outer,Saeed Bin Shamim,Dhaka Cable Network,/01701205706,40%,F@H,120162,Brahmanbaria-Nabinagar-BTS-Jibonganj (SA)
+2,SATKHIRA_PARULIA_DEBHATA_BTS_DIST_BRAS_01,10.20.231.89,KHULNA,Rezaul Islam ,Friends Internet Service Center,/01730988316,40%,SCL,lnk3_140322_014_nb,Satkhira-Debhata-BTS-Debhata (SA)
+3,TETULIA_PANCHAGARH_DST_BRAS_1,10.20.231.60,NORTH,Faruck Hossain,Tetulia Broadband,/01744511490,40%,F@H,90357,Panchagarh-Tetulia-BTS-Tetulia (SA)
+4,JOYNOGOR_KASBA_DIST_BRAS_01,10.20.231.207,DHAKA,Saeed Bin Shamim,Re Dot Net 2,/01793-954313‬,40%,F@H,136041,Brahmanbaria-Kasba-BTS-Joynogor Bazar (SA)
+5,Khulna_Paikgasa_BTS_City_market_DST_BRAS_01,10.20.231.75,KHULNA,Rezaul Islam ,"Doyal Internet, Kopilmoni, Paikgacha, Khulna",/01912111599,40%,SCL,lnk3_010126_033_nb,Khulna-Paikgasa-BTS-City Market (SA)
+6,HABIGANJ_MADHABPUR_HOROSHPUR_BTS_DIST_BRAS_01,10.20.231.194,SYLHET,Rezaul Islam ,Sijan Power Network,/01773362662,40%,SCL,lnk3_140525_030_nb,Habiganj-Madhabpur-BTS-Horoshpur (SA)
+7,SATKHIRA_SHYAMNAGAR_JHAPA_BTS_DIST_BRAS_01,10.20.231.65,KHULNA,Rezaul Islam ,Rudra Satellite Cables,/01998044145,40%,SCL,lnk3_181225_040_nb,Satkhira-Shyamnagar-BTS-Jhapa (SA)
+8,MUNSHIGANJ_TONGIBARI_BAGIA_BTS_DIST_BRAS_1,10.20.231.97,DHAKA,Saeed Bin Shamim,Super Speed Internet,/01918358916,40%,SCL,lnk3_300322_060_nb,Munshiganj-Tongibari-BTS-Tongibari (SA)
+9,BIROL_DINAJPUR_DIST_BRAS_01,10.20.231.246,NORTH,Faruck Hossain,Birol Online,/01727803290,40%,SCL,lnk3_091125_048_nb,Dinajpur-Birol-BTS-Birol (SA)
+10,GAIBANDHA_PACHPIR_BAZAR_BTS_DIST_1,10.20.231.124,NORTH,Faruck Hossain,Jonocollan Cable Network,/01713930981,40%,F@H,97800,Gaibandha-Sundarganj-BTS-Pach Pir Bazar (SA)

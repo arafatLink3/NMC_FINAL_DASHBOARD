@@ -1,0 +1,85 @@
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Editor session cache ---
+.puku/
+nmc-monorepo/.scratch/
+
+# --- Logs ---
+*.log
+logs/
+*.err
+*.out
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Node / build artefacts ---
+node_modules/
+**/node_modules/
+.pnp/
+.pnp.*
+.npm/
+.yarn/
+.pnpm-store/
+
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# --- Test / coverage ---
+coverage/
+.nyc_output/
+*.lcov
+
+# --- Cache dirs ---
+.turbo/
+.cache/
+.parcel-cache/
+.eslintcache
+.vite/
+.next/
+.nuxt/
+.svelte-kit/
+.tmp/
+.temp/
+
+# --- Tooling scratch files (workspace-local diagnostics) ---
+typecheck*.txt
+typecheck-*.txt
+web-test-output.txt
+typecheck-test.txt
+typecheck4.txt
+typecheck5.txt
+server-test-output.txt
+
+# --- Server runtime data ---
+# Live SQLite store; the schema lives in migrations/, this is just
+# the populated file.
+nmc-monorepo/server/data/*.sqlite
+nmc-monorepo/server/data/*.sqlite-journal
+nmc-monorepo/server/data/*.sqlite-wal
+nmc-monorepo/server/data/*.sqlite-shm
+
+# --- Inspect / debug helpers ---
+nmc-monorepo/server/inspect-store.cjs
+nmc-monorepo/server/inspect-store.cjs.map
+
+# --- Legacy static SPA runtime state ---
+"NMC Dashboard"/data/*.local.*

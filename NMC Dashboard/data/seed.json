@@ -1,0 +1,35 @@
+{
+  "contacts": [],
+  "bras": [
+    { "id":"b-001","zone":"DHK","district":"Dhaka",  "bts":"DHK-Dhanmondi",     "serviceAgent":"Link3 Own",   "brasName":"BRAS-DHK-DHN-01",  "loopback":"100.64.10.1",  "contact":"+8801711000003" },
+    { "id":"b-002","zone":"DHK","district":"Gazipur", "bts":"DHK-Gazipur",       "serviceAgent":"SA Gazipur",  "brasName":"BRAS-DHK-GZP-01",  "loopback":"100.64.10.2",  "contact":"+8801711000004" },
+    { "id":"b-003","zone":"CTG","district":"Feni",    "bts":"BL_Sonagazi",        "serviceAgent":"SA Sonagazi", "brasName":"BRAS-CTG-SNG-01",  "loopback":"100.64.20.1",  "contact":"+8801711000004" },
+    { "id":"b-004","zone":"CTG","district":"Chandpur","bts":"BL_Hajiganj",       "serviceAgent":"SA Hajiganj", "brasName":"BRAS-CTG-HJG-01",  "loopback":"100.64.20.2",  "contact":"+8801711000004" },
+    { "id":"b-005","zone":"SYL","district":"Sylhet",  "bts":"SYL-Sadar",         "serviceAgent":"Link3 Own",   "brasName":"BRAS-SYL-SDR-01",  "loopback":"100.64.30.1",  "contact":"+8801711000003" }
+  ],
+  "scr": [
+    { "id":"s-001","provider":"SCL","area":"DHK-Dhanmondi ↔ DHK-Agargaon","scrId":"SCL-2024-0001","capacity":"10G","linkType":"Backbone" },
+    { "id":"s-002","provider":"F@H","area":"DHK-Mirpur ↔ DHK-Uttara",     "scrId":"FAH-2024-0042","capacity":"10G","linkType":"Backbone" },
+    { "id":"s-003","provider":"SCL","area":"CTG-Sonagazi POP",            "scrId":"SCL-2024-0144","capacity":"2G", "linkType":"NTTN Last Mile" },
+    { "id":"s-004","provider":"F@H","area":"CTG-Hajiganj RTR",            "scrId":"FAH-2024-0152","capacity":"2G", "linkType":"NTTN Last Mile" }
+  ],
+  "rosters": [
+    { "id":"r-001","dept":"NMC","name":"Arafat",  "date":"2026-06-02","shift":"Morning" },
+    { "id":"r-002","dept":"NMC","name":"Khaled",  "date":"2026-06-02","shift":"Morning" },
+    { "id":"r-003","dept":"NMC","name":"Peal",    "date":"2026-06-02","shift":"Evening" },
+    { "id":"r-004","dept":"NMC","name":"Obayed",  "date":"2026-06-02","shift":"Evening" },
+    { "id":"r-005","dept":"NMC","name":"Ujjal",   "date":"2026-06-02","shift":"Night"   },
+    { "id":"r-006","dept":"NMC","name":"Masum",   "date":"2026-06-02","shift":"Morning" },
+    { "id":"r-007","dept":"NMC","name":"Arafat",  "date":"2026-06-03","shift":"Evening" },
+    { "id":"r-008","dept":"NMC","name":"Obayed",  "date":"2026-06-03","shift":"Night"   },
+    { "id":"r-009","dept":"BNOC","name":"Mahmud",  "date":"2026-06-02","shift":"Morning" },
+    { "id":"r-010","dept":"BNOC","name":"Rakib",   "date":"2026-06-02","shift":"Evening" },
+    { "id":"r-011","dept":"NGNC","name":"Sabbir",  "date":"2026-06-02","shift":"Morning" },
+    { "id":"r-012","dept":"NCSS","name":"Nazmul",  "date":"2026-06-02","shift":"Morning" }
+  ],
+  "ccb": [
+    { "id":"ccb-001","type":"CCB","title":"DHK Core router software upgrade","area":"DHK-Dhanmondi","start":"2026-06-02T22:00:00","end":"2026-06-03T02:00:00","source":"mail","status":"Upcoming" },
+    { "id":"ccb-002","type":"NCR","title":"SCL end backbone link maintenance","area":"DHK-Agargaon","start":"2026-06-02T14:00:00","end":"2026-06-02T18:00:00","source":"mail","status":"Active" },
+    { "id":"ccb-003","type":"PID","title":"F@H last mile replacement — CTG","area":"CTG-Hajiganj","start":"2026-06-04T01:00:00","end":"2026-06-04T05:00:00","source":"mail","status":"Upcoming" }
+  ]
+}

@@ -1,0 +1,5 @@
+name,role,dept,zone,district,level,phone,email,tags
+Iftekhairul Islam,Zonal In-Charge,Survey & Transmission,CTG,Feni,L2,+8801711000001,iftek@example.com,"dhk,ctg"
+Template Zonal Person 1,NGNC Engineer,NGNC,DHK,Dhaka,L2,+8801711000099,zone1@example.com,dhk
+Template Zonal Person 2,BNOC Distributor,BNOC,CTG,Feni,L1,+8801711000098,zone2@example.com,dist
+Template SCL NOC,SCL NOC,NTTN (SCL),ALL,ALL,L3,+8801711000088,scl-noc@example.com,"scl,nttn"

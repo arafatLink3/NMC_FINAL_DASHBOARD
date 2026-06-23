@@ -1,0 +1,7 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'server'
+allowBuilds:
+  protobufjs: true
+  sqlite3: set this to true or false

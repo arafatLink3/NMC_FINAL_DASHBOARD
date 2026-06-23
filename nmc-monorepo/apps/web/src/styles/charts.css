@@ -1,0 +1,13 @@
+/* SVG chart helpers — small, dependency-free. */
+
+.chart-axis-line { stroke: var(--border); stroke-width: 1; }
+.chart-grid-line { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 3; }
+.chart-axis-text { fill: var(--muted); font-size: 10px; font-family: inherit; }
+.chart-line      { fill: none; stroke: var(--primary); stroke-width: 2; }
+.chart-line-area { fill: var(--primary); fill-opacity: 0.12; }
+.chart-point     { fill: var(--primary); }
+.chart-bar       { fill: var(--primary); }
+.chart-bar:hover { fill: var(--primary-hover); }
+.chart-pie-label { fill: var(--text); font-size: 11px; font-family: inherit; }
+.chart-empty     { fill: var(--muted); font-size: 12px; font-family: inherit; }
+.chart-legend    { fill: var(--muted); font-size: 11px; font-family: inherit; }

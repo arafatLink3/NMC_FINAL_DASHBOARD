@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "updatedAt": "2026-06-10",
+  "source": "backend-config",
+  "links": [
+    {
+      "id": "nms-wug",
+      "name": "WhatsUpGold",
+      "url": "http://nms.link3.net:4343/NmConsole/Workspace/HomeWorkspace/HomeWorkspace.asp",
+      "category": "NMS",
+      "desc": "Uptime & device monitoring"
+    },
+    {
+      "id": "nms-zab",
+      "name": "Zabbix",
+      "url": "http://100.64.180.10/zabbix/zabbix.php?action=dashboard.view&dashboardid=1",
+      "category": "NMS",
+      "desc": "Infrastructure metrics & alerts"
+    },
+    {
+      "id": "nms-cac",
+      "name": "Cacti",
+      "url": "http://traffic.link3.net/plugins/weathermap/weathermap-cacti-plugin.php",
+      "category": "NMS",
+      "desc": "SNMP traffic graphs"
+    },
+    {
+      "id": "nms-cor",
+      "name": "Corero",
+      "url": "https://10.20.101.163:8000/en-US/app/securewatch_analytics/home",
+      "category": "Security",
+      "desc": "DDoS detection"
+    },
+    {
+      "id": "nms-nex",
+      "name": "Nexusguard",
+      "url": "https://support.nexusguard.com/#/customer/1978/op/dashboard/site/1069/op_type/cloud/overview",
+      "category": "Security",
+      "desc": "DDoS mitigation"
+    },
+    {
+      "id": "nms-nce",
+      "name": "NCE-IP",
+      "url": "https://100.64.174.2:31943/nmsnetworkmgrwebsite/v1/webswing/indexforwebswing.html",
+      "category": "Controller",
+      "desc": "Huawei NCE controller"
+    },
+    {
+      "id": "nms-fnm",
+      "name": "FastNetMon",
+      "url": "http://203.76.96.135:81/d/sqJNdgdVz/fastnetmon",
+      "category": "Security",
+      "desc": "BGP/pps alerts"
+    },
+    {
+      "id": "nms-obs",
+      "name": "Observium",
+      "url": "http://203.76.96.39",
+      "category": "NMS",
+      "desc": "Auto-discovery monitoring"
+    },
+    {
+      "id": "nms-out",
+      "name": "Outlook",
+      "url": "https://mailweb.link3.net/owa/#path=/mail",
+      "category": "Office",
+      "desc": "Email & calendar"
+    },
+    {
+      "id": "nms-wa",
+      "name": "WhatsApp Web",
+      "url": "https://web.whatsapp.com",
+      "category": "Office",
+      "desc": "Browser WA"
+    },
+    {
+      "id": "nms-qcl",
+      "name": "QuickCall",
+      "url": "http://10.10.191.22/digilink3/",
+      "category": "NMS",
+      "desc": "Call flow monitoring"
+    },
+    {
+      "id": "nms-nag",
+      "name": "Nagios",
+      "url": "https://fol.link3.net/nagios/",
+      "category": "NMS",
+      "desc": "Continuously server monitoring"
+    }
+  ]
+}
