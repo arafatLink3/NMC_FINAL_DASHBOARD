@@ -79,3 +79,4 @@ Open:
 ## Faithful port
 
 This is a **port**, not a rewrite. The AI rules, dropdown defaults, page behaviours, and BRAS wire-protocol are preserved 1-to-1 from the legacy `NMC Dashboard/js/...` and `NMC Dashboard/controllers|models|migrations|routes` directories.
+

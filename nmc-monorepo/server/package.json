@@ -24,7 +24,9 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "tsc -p tsconfig.json --watch",
+    "dev:build": "tsc -p tsconfig.json --watch",
+    "dev:start": "node --enable-source-maps dist/server.js",
+    "dev": "node ./scripts/dev.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "start": "node --enable-source-maps dist/server.js",

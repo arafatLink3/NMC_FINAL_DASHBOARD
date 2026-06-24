@@ -264,3 +264,16 @@ export const IconMore = (p: IconProps) => (
     <circle cx="5" cy="12" r="1" />
   </Base>
 );
+
+export const IconFilter = (p: IconProps) => (
+  <Base {...p}>
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+  </Base>
+);
+
+export const IconTrash2 = (p: IconProps) => (
+  <Base {...p}>
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
+  </Base>
+);

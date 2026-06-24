@@ -7,7 +7,9 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel --stream run dev",
+    "dev": "pnpm --filter @nmc/server dev & pnpm --filter @nmc/web dev",
+    "dev:server": "pnpm --filter @nmc/server dev",
+    "dev:web": "pnpm --filter @nmc/web dev",
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",

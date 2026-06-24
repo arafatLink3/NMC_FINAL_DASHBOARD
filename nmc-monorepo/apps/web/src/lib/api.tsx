@@ -13,11 +13,14 @@ type Ctx = NmcApi & {
 const ApiContext = createContext<Ctx | null>(null);
 
 function readBaseUrl(): string {
-  if (typeof window === 'undefined') return 'http://localhost:3000';
+  if (typeof window === 'undefined') return 'http://localhost:4000';
   const fromStorage = localStorage.getItem('nmc.apiBase');
   if (fromStorage) return fromStorage;
-  // same-origin fallback when the SPA is served behind a reverse proxy
-  return window.location.origin;
+  // The endpoint paths in @nmc/api-client are absolute (e.g. '/api/auth/login'),
+  // so we keep baseUrl empty and let them render as-is. The Vite dev server
+  // proxies /api/* to Fastify, and in production the same origin serves /api.
+  // Relative URLs (no host) keep the request same-origin → no CORS preflight.
+  return '';
 }
 
 export function ApiProvider({ children }: { children: ReactNode }) {
