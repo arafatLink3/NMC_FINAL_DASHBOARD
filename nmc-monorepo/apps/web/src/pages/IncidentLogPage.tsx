@@ -47,32 +47,60 @@ function writeDD(dd: DropdownOptions) {
   try { localStorage.setItem(DD_KEY, JSON.stringify(dd)); } catch {}
 }
 
-// ---------- column definitions (mirrors legacy COLS — 33 columns) ----------
-type Col = { key: string; label: string; w?: number };
+// ---------- column definitions (mirrors legacy COLS — table & modal) ----------
+// These 23 columns are the single source of truth for BOTH the master
+// Incident Log table (see <thead> below) AND the Edit modal's field grid.
+// Adding a new field here automatically propagates to the table header,
+// search index, filter picker, export, and the Edit modal — keeping
+// column-wise parity with the legacy `incidentLog.js` COLS spec.
+//
+// `auto: true` marks columns that are derived (read-only) — currently
+// just `duration`, which is recomputed from faultTime/restorationTime
+// on save. `kind` tells the modal which input shape to render.
+type ColKind = 'dropdown' | 'text' | 'date' | 'time' | 'auto';
+type Col = { key: string; label: string; w?: number; kind?: ColKind; auto?: boolean };
 const COLS: Col[] = [
-  { key: 'session',          label: 'Session',           w: 70 },
-  { key: 'name',             label: 'Name' },
-  { key: 'incidentName',     label: 'Incident' },
-  { key: 'category',         label: 'Category' },
-  { key: 'subCategory',      label: 'Sub-category' },
-  { key: 'zone',             label: 'Zone' },
-  { key: 'ic',               label: 'IC' },
-  { key: 'faultTime',        label: 'Fault',             w: 130 },
-  { key: 'restorationTime',  label: 'Restored',          w: 130 },
-  { key: 'duration',         label: 'Duration',          w: 110 },
-  { key: 'ticketId',         label: 'TT',                w: 90 },
-  { key: 'type',             label: 'Type' },
-  { key: 'rootCause',        label: 'Root cause' },
-  { key: 'rcaProvider',      label: 'RCA provider' },
-  { key: 'actionTaken',      label: 'Action' },
-  { key: 'issueType',        label: 'Issue type' },
-  { key: 'department',       label: 'Dept' },
-  { key: 'team',             label: 'Team' },
-  { key: 'informedPerson',   label: 'Informed' },
-  { key: 'whatsapp',         label: 'WhatsApp' },
-  { key: 'mail',             label: 'Mail' },
-  { key: 'currentStatus',    label: 'Status' },
+  { key: 'session',          label: 'Session',           w: 70,  kind: 'dropdown' },
+  { key: 'name',             label: 'Name',                   kind: 'dropdown' },
+  { key: 'incidentName',     label: 'Incident',               kind: 'text' },
+  { key: 'category',         label: 'Category',               kind: 'dropdown' },
+  { key: 'subCategory',      label: 'Sub-category',           kind: 'dropdown' },
+  { key: 'zone',             label: 'Zone',                   kind: 'dropdown' },
+  { key: 'ic',               label: 'IC',                     kind: 'text' },
+  { key: 'faultTime',        label: 'Fault',             w: 130, kind: 'time' },
+  { key: 'restorationTime',  label: 'Restored',          w: 130, kind: 'time' },
+  { key: 'duration',         label: 'Duration',          w: 110, kind: 'auto', auto: true },
+  { key: 'ticketId',         label: 'TT',                w: 90,  kind: 'text' },
+  { key: 'type',             label: 'Type',                   kind: 'dropdown' },
+  { key: 'rootCause',        label: 'Root cause',             kind: 'text' },
+  { key: 'rcaProvider',      label: 'RCA provider',           kind: 'text' },
+  { key: 'actionTaken',      label: 'Action',                 kind: 'text' },
+  { key: 'issueType',        label: 'Issue type',             kind: 'dropdown' },
+  { key: 'department',       label: 'Dept',                   kind: 'dropdown' },
+  { key: 'team',             label: 'Team',                   kind: 'dropdown' },
+  { key: 'informedPerson',   label: 'Informed',               kind: 'text' },
+  { key: 'whatsapp',         label: 'WhatsApp',               kind: 'dropdown' },
+  { key: 'mail',             label: 'Mail',                   kind: 'dropdown' },
+  { key: 'currentStatus',    label: 'Status',                 kind: 'dropdown' },
 ];
+
+// Map COLS.key → DropdownOptions key (legacy used these names for the
+// persisted dropdown lists). Keeps the dropdown store aligned with the
+// legacy `nmc.*` localStorage keys.
+const COL_DROPDOWN: Record<string, keyof DropdownOptions | undefined> = {
+  session:        'session',
+  name:           'sessionEngineers',
+  category:       'incidentCategory',
+  subCategory:    'incidentSubCategory',
+  zone:           'zone',
+  type:           'ticketType',
+  issueType:      'issueType',
+  department:     'forwardDepartment',
+  team:           'responsibleTeam',
+  whatsapp:       'whatsappNotified',
+  mail:           'mailGenerated',
+  currentStatus:  'currentStatus',
+};
 
 // ---------- status palette (mirrors legacy isResolvedRow + age buckets) ----
 type StatusClass = 'solved' | 'sky' | 'orange' | 'yellow' | 'ash';
@@ -1076,8 +1104,28 @@ function IncidentEditModal(props: {
   const original = rows.find((r) => r.id === id);
   const [f, setF] = useState<Partial<IncidentRecord>>(() => original ?? {});
 
+  // Tracks which COLS.key the operator has actually edited. Keys NOT in
+  // this set are considered "untouched" — their values round-trip from
+  // `original` verbatim on Save. This is the React equivalent of the
+  // legacy `data-pristine="1"` flag on the dual HH/MM dropdowns, and it
+  // is what stops Save from silently zero-ing out original :SS seconds
+  // or rewriting the row's stored time when the operator never touched
+  // the pickers.
+  const [dirty, setDirty] = useState<Set<string>>(new Set());
+  // Tracks the saved-time pristine flag for the split time pickers.
+  // When the user has not picked a new HH/MM, the field is "pristine"
+  // and Save preserves the original ISO timestamp verbatim.
+  const [timePristine, setTimePristine] = useState<{ fault: boolean; restored: boolean }>({
+    fault: true,
+    restored: true,
+  });
+
   useEffect(() => {
-    if (original) setF(original);
+    if (original) {
+      setF(original);
+      setDirty(new Set());
+      setTimePristine({ fault: true, restored: true });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -1085,47 +1133,182 @@ function IncidentEditModal(props: {
 
   function up<K extends keyof IncidentRecord>(k: K, v: IncidentRecord[K]) {
     setF((p) => ({ ...p, [k]: v }));
+    setDirty((s) => {
+      if (s.has(k as string)) return s;
+      const n = new Set(s);
+      n.add(k as string);
+      return n;
+    });
   }
 
-  // Time pickers: date + HH:MM (mirrors legacy time pickers)
-  const faultDate = dateFromISO((f as { faultTime?: string }).faultTime);
-  const faultTime = hhmmFromISO((f as { faultTime?: string }).faultTime);
-  const restDate = dateFromISO((f as { restorationTime?: string }).restorationTime);
-  const restTime = hhmmFromISO((f as { restorationTime?: string }).restorationTime);
+  // ---- time-picker helpers (mirrors legacy combinedTime/renderSplitTimeField) ----
+  // Build the live HH/MM strings for the dual dropdowns from the stored
+  // ISO timestamp. Falls back to '' for missing/invalid values so the
+  // dropdowns open with a blank selection.
+  const splitHM = (iso: unknown): { hh: string; mm: string } => {
+    const v = typeof iso === 'string' ? iso : '';
+    const m = v.trim().match(/T(\d{1,2}):(\d{2})/);
+    if (!m) return { hh: '', mm: '' };
+    return {
+      hh: String(parseInt(m[1] ?? '0', 10)).padStart(2, '0'),
+      mm: String(parseInt(m[2] ?? '0', 10)).padStart(2, '0'),
+    };
+  };
+  // Re-stamp a stored ISO timestamp's HH/MM (or strip the time portion
+  // entirely if both halves are blank). Date is preserved verbatim so a
+  // midnight-crossing incident is not silently moved to a different day.
+  const applyHM = (iso: unknown, hh: string, mm: string): string | undefined => {
+    if (!hh && !mm) return undefined;
+    const base = typeof iso === 'string' && iso ? iso : new Date().toISOString();
+    const d = new Date(base);
+    if (Number.isNaN(d.getTime())) return base;
+    d.setHours(parseInt(hh || '0', 10), parseInt(mm || '0', 10), 0, 0);
+    return d.toISOString();
+  };
+  // Combined value used for live duration preview — always reflects
+  // the in-memory state regardless of pristine flag.
+  const liveDur = durationBetween(
+    (f as { faultTime?: string }).faultTime,
+    (f as { restorationTime?: string }).restorationTime,
+  );
 
-  function setFault(date: string, time: string) {
-    if (!date && !time) { up('faultTime', undefined as unknown as string); return; }
-    if (!time) { up('faultTime', new Date(date + 'T00:00:00').toISOString()); return; }
-    const d = new Date(date || new Date().toISOString().slice(0, 10) + 'T00:00:00');
-    const [hh, mm] = time.split(':').map(Number);
-    d.setHours(hh || 0, mm || 0, 0, 0);
-    up('faultTime', d.toISOString());
-  }
-  function setRest(date: string, time: string) {
-    if (!date && !time) { up('restorationTime', undefined as unknown as string); return; }
-    if (!time) { up('restorationTime', new Date(date + 'T00:00:00').toISOString()); return; }
-    const d = new Date(date || new Date().toISOString().slice(0, 10) + 'T00:00:00');
-    const [hh, mm] = time.split(':').map(Number);
-    d.setHours(hh || 0, mm || 0, 0, 0);
-    up('restorationTime', d.toISOString());
-  }
-
-  // Live duration (mirrors legacy live duration display)
-  const liveDur = durationBetween((f as { faultTime?: string }).faultTime, (f as { restorationTime?: string }).restorationTime);
-
+  // Build a clean "next" record: take the original row, apply ONLY the
+  // fields the operator actually touched (the `dirty` set), and stamp
+  // updatedAt. Auto-calc fields (duration) are always recomputed from
+  // the timestamps so they cannot be edited manually.
   function save() {
     if (!original) return;
-    const next: IncidentRecord = {
-      ...original,
-      ...f,
-      id: original.id,
-      updatedAt: new Date().toISOString(),
-    } as IncidentRecord;
+    const next: IncidentRecord = { ...original } as IncidentRecord;
+    dirty.forEach((k) => {
+      const v = (f as Record<string, unknown>)[k];
+      (next as Record<string, unknown>)[k] = v;
+    });
+    // duration is always derived; never write it from f.
+    if (dirty.has('faultTime') || dirty.has('restorationTime')) {
+      next.duration = liveDur || '';
+    }
+    next.id = original.id;
+    next.updatedAt = new Date().toISOString();
     onSave(next);
   }
 
-  const team = String((f as { team?: string }).team ?? '');
-  const ownerList = team && FIXED_ENGINEERS[team] ? FIXED_ENGINEERS[team] : ALL_ENGINEERS;
+  // ---- per-column renderer (one input per COLS entry) ----
+  function renderCol(c: Col) {
+    const v = (f as Record<string, unknown>)[c.key];
+
+    // Auto-calc columns (duration): read-only display, same as the
+    // table's "Duration" cell.
+    if (c.auto || c.kind === 'auto') {
+      return (
+        <div key={c.key} className="col-6">
+          <label>{c.label}</label>
+          <div className="ticket-mono" style={{ padding: '6px 8px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4 }}>
+            {liveDur ? fmtLongDuration(liveDur) : '—'}
+          </div>
+        </div>
+      );
+    }
+
+    // Time columns (faultTime / restorationTime): dual HH + MM
+    // dropdowns side-by-side, mirroring the legacy `renderSplitTimeField`.
+    // We split the ISO timestamp into HH/MM and only write back the
+    // timestamp if the user has touched the pickers (combinedTime
+    // semantics). Until then, the stored value is preserved verbatim
+    // — including the original :SS seconds — via the timePristine flag.
+    if (c.kind === 'time') {
+      const isFault = c.key === 'faultTime';
+      const pristineKey = isFault ? 'fault' : 'restored';
+      const parts = splitHM(v);
+      const opts = timeOptions();
+      return (
+        <div key={c.key} className="col-6">
+          <label>{c.label}</label>
+          <div className="flex" style={{ gap: 4, alignItems: 'center' }}>
+            <select
+              data-pristine={timePristine[pristineKey] ? '1' : '0'}
+              value={parts.hh}
+              onChange={(e) => {
+                const hh = e.target.value;
+                const next = applyHM(v, hh, parts.mm);
+                up(c.key as keyof IncidentRecord, (next ?? '') as IncidentRecord[keyof IncidentRecord]);
+                setTimePristine((p) => ({ ...p, [pristineKey]: false }));
+              }}
+              style={{ flex: 1 }}
+              title="Hours (00-23)"
+            >
+              <option value="">HH</option>
+              {opts.map((o) => <option key={`h-${o}`} value={o}>{o}</option>)}
+            </select>
+            <span style={{ fontWeight: 600 }}>:</span>
+            <select
+              data-pristine={timePristine[pristineKey] ? '1' : '0'}
+              value={parts.mm}
+              onChange={(e) => {
+                const mm = e.target.value;
+                const next = applyHM(v, parts.hh, mm);
+                up(c.key as keyof IncidentRecord, (next ?? '') as IncidentRecord[keyof IncidentRecord]);
+                setTimePristine((p) => ({ ...p, [pristineKey]: false }));
+              }}
+              style={{ flex: 1 }}
+              title="Minutes (00-59)"
+            >
+              <option value="">MM</option>
+              {opts.map((o) => <option key={`m-${o}`} value={o}>{o}</option>)}
+            </select>
+          </div>
+        </div>
+      );
+    }
+
+    // Dropdown columns: DDInput (combobox with inline "Add new…").
+    if (c.kind === 'dropdown') {
+      const ddKey = COL_DROPDOWN[c.key];
+      if (!ddKey) {
+        // No dropdown configured — fall through to text input.
+        return (
+          <div key={c.key} className="col-6">
+            <label>{c.label}</label>
+            <input value={v == null ? '' : String(v)} onChange={(e) => up(c.key as keyof IncidentRecord, e.target.value as unknown as IncidentRecord[keyof IncidentRecord])} />
+          </div>
+        );
+      }
+      return (
+        <div key={c.key} className="col-6">
+          <label>{c.label}</label>
+          <DDInput
+            field={ddKey}
+            value={v == null ? '' : String(v)}
+            dd={dd}
+            onChange={(s) => up(c.key as keyof IncidentRecord, s as unknown as IncidentRecord[keyof IncidentRecord])}
+            onAddOption={(l) => onAddOption(ddKey, l)}
+          />
+        </div>
+      );
+    }
+
+    // Text columns (default): a single <input> bound to f[k]. We use a
+    // textarea-style class for long text fields (incidentName, rootCause,
+    // actionTaken) and a regular input for short ones, but the bound
+    // state is the same either way.
+    const long = c.key === 'incidentName' || c.key === 'rootCause' || c.key === 'actionTaken';
+    return (
+      <div key={c.key} className={long ? 'col-12' : 'col-6'}>
+        <label>{c.label}</label>
+        {long ? (
+          <textarea
+            rows={2}
+            value={v == null ? '' : String(v)}
+            onChange={(e) => up(c.key as keyof IncidentRecord, e.target.value as unknown as IncidentRecord[keyof IncidentRecord])}
+          />
+        ) : (
+          <input
+            value={v == null ? '' : String(v)}
+            onChange={(e) => up(c.key as keyof IncidentRecord, e.target.value as unknown as IncidentRecord[keyof IncidentRecord])}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="modal-mask" onClick={onClose}>
@@ -1135,140 +1318,11 @@ function IncidentEditModal(props: {
           <button className="btn ghost sm" onClick={onClose}><IconX size={12} /></button>
         </div>
 
-        <div className="row" style={{ marginTop: 12 }}>
-          {/* row 1: session / name */}
-          <div className="col-3"><label>Session</label>
-            <DDInput field="session" value={f.session ?? 'Day'} dd={dd}
-              onChange={(v) => up('session', v)} onAddOption={(l) => onAddOption('session', l)} />
-          </div>
-          <div className="col-9"><label>Name</label>
-            <input value={f.name ?? ''} onChange={(e) => up('name', e.target.value)} />
-          </div>
-
-          {/* row 2: incident */}
-          <div className="col-12"><label>Incident</label>
-            <input value={f.incidentName ?? ''} onChange={(e) => up('incidentName', e.target.value)} />
-          </div>
-
-          {/* row 3: category / sub / zone */}
-          <div className="col-4"><label>Category</label>
-            <DDInput field="incidentCategory" value={f.category ?? ''} dd={dd}
-              onChange={(v) => up('category', v)} onAddOption={(l) => onAddOption('incidentCategory', l)} />
-          </div>
-          <div className="col-4"><label>Sub-category</label>
-            <DDInput field="incidentSubCategory" value={f.subCategory ?? ''} dd={dd}
-              onChange={(v) => up('subCategory', v)} onAddOption={(l) => onAddOption('incidentSubCategory', l)} />
-          </div>
-          <div className="col-4"><label>Zone</label>
-            <DDInput field="zone" value={f.zone ?? ''} dd={dd}
-              onChange={(v) => up('zone', v)} onAddOption={(l) => onAddOption('zone', l)} />
-          </div>
-
-          {/* row 4: ic / status / type */}
-          <div className="col-3"><label>IC</label>
-            <input value={f.ic ?? ''} onChange={(e) => up('ic', e.target.value)} />
-          </div>
-          <div className="col-3"><label>Status</label>
-            <DDInput field="currentStatus" value={f.currentStatus ?? 'Running'} dd={dd}
-              onChange={(v) => up('currentStatus', v)} onAddOption={(l) => onAddOption('currentStatus', l)} />
-          </div>
-          <div className="col-3"><label>Type</label>
-            <DDInput field="ticketType" value={f.type ?? ''} dd={dd}
-              onChange={(v) => up('type', v)} onAddOption={(l) => onAddOption('ticketType', l)} />
-          </div>
-          <div className="col-3"><label>TT</label>
-            <input value={f.ticketId ?? ''} onChange={(e) => up('ticketId', e.target.value)} />
-          </div>
-
-          {/* row 5: issue / root cause / rca provider */}
-          <div className="col-4"><label>Issue type</label>
-            <DDInput field="issueType" value={f.issueType ?? ''} dd={dd}
-              onChange={(v) => up('issueType', v)} onAddOption={(l) => onAddOption('issueType', l)} />
-          </div>
-          <div className="col-4"><label>Root cause</label>
-            <input value={f.rootCause ?? ''} onChange={(e) => up('rootCause', e.target.value)} />
-          </div>
-          <div className="col-4"><label>RCA provider</label>
-            <input value={f.rcaProvider ?? ''} onChange={(e) => up('rcaProvider', e.target.value)} />
-          </div>
-
-          {/* row 6: dept / team / informed */}
-          <div className="col-3"><label>Dept</label>
-            <DDInput field="forwardDepartment" value={f.department ?? ''} dd={dd}
-              onChange={(v) => up('department', v)} onAddOption={(l) => onAddOption('forwardDepartment', l)} />
-          </div>
-          <div className="col-3"><label>Team</label>
-            <DDInput field="responsibleTeam" value={f.team ?? ''} dd={dd}
-              onChange={(v) => up('team', v)} onAddOption={(l) => onAddOption('responsibleTeam', l)} />
-          </div>
-          <div className="col-3"><label>Informed</label>
-            <input value={f.informedPerson ?? ''} onChange={(e) => up('informedPerson', e.target.value)} />
-          </div>
-          <div className="col-3"><label>WhatsApp</label>
-            <DDInput field="whatsappNotified" value={f.whatsapp ?? ''} dd={dd}
-              onChange={(v) => up('whatsapp', v)} onAddOption={(l) => onAddOption('whatsappNotified', l)} />
-          </div>
-
-          {/* row 7: mail / action taken */}
-          <div className="col-3"><label>Mail</label>
-            <DDInput field="mailGenerated" value={f.mail ?? ''} dd={dd}
-              onChange={(v) => up('mail', v)} onAddOption={(l) => onAddOption('mailGenerated', l)} />
-          </div>
-          <div className="col-9"><label>Action taken</label>
-            <input value={f.actionTaken ?? ''} onChange={(e) => up('actionTaken', e.target.value)} />
-          </div>
-
-          {/* row 8: contact fields (mirrors legacy contact line) */}
-          <div className="col-4"><label>Contact name</label>
-            <input value={(f as { contactName?: string }).contactName ?? ''}
-              onChange={(e) => up('contactName' as keyof IncidentRecord, e.target.value as unknown as IncidentRecord[keyof IncidentRecord])} />
-          </div>
-          <div className="col-3"><label>Phone</label>
-            <input value={(f as { contactPhone?: string }).contactPhone ?? ''}
-              onChange={(e) => up('contactPhone' as keyof IncidentRecord, e.target.value as unknown as IncidentRecord[keyof IncidentRecord])} />
-          </div>
-          <div className="col-5"><label>Email</label>
-            <input value={(f as { contactEmail?: string }).contactEmail ?? ''}
-              onChange={(e) => up('contactEmail' as keyof IncidentRecord, e.target.value as unknown as IncidentRecord[keyof IncidentRecord])} />
-          </div>
-
-          {/* row 9: address / details */}
-          <div className="col-6"><label>Address</label>
-            <input value={(f as { address?: string }).address ?? ''}
-              onChange={(e) => up('address' as keyof IncidentRecord, e.target.value as unknown as IncidentRecord[keyof IncidentRecord])} />
-          </div>
-          <div className="col-6"><label>Details</label>
-            <input value={(f as { details?: string }).details ?? ''}
-              onChange={(e) => up('details' as keyof IncidentRecord, e.target.value as unknown as IncidentRecord[keyof IncidentRecord])} />
-          </div>
-
-          {/* row 10: time pickers (date + HH:MM) */}
-          <div className="col-3"><label>Fault date</label>
-            <input type="date" value={faultDate} onChange={(e) => setFault(e.target.value, faultTime)} />
-          </div>
-          <div className="col-3"><label>Fault time</label>
-            <select value={faultTime} onChange={(e) => setFault(faultDate, e.target.value)}>
-              <option value="">—</option>
-              {timeOptions().map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
-          <div className="col-3"><label>Restored date</label>
-            <input type="date" value={restDate} onChange={(e) => setRest(e.target.value, restTime)} />
-          </div>
-          <div className="col-3"><label>Restored time</label>
-            <select value={restTime} onChange={(e) => setRest(restDate, e.target.value)}>
-              <option value="">—</option>
-              {timeOptions().map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
-
-          {/* row 11: live duration (mirrors legacy c_duration_display) */}
-          <div className="col-12">
-            <label>Duration</label>
-            <div id="c_duration_display" className="ticket-mono">
-              {liveDur ? fmtLongDuration(liveDur) : '—'}
-            </div>
-          </div>
+        {/* Field grid — driven entirely by COLS. Adding a new column to
+            the COLS array above automatically renders it here with the
+            same label and order as the master Incident Log table. */}
+        <div className="row" style={{ marginTop: 12, maxHeight: '60vh', overflowY: 'auto', paddingRight: 4 }}>
+          {COLS.map(renderCol)}
         </div>
 
         <div className="actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
