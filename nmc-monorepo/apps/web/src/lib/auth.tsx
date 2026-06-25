@@ -1,111 +1,146 @@
-// Auth context: thin wrapper over @nmc/api-client that exposes {user, token, login, logout}.
-// Persists the JWT in localStorage via the api-client's token storage.
+// Thin React hook that wraps @nmc/api-client for the SPA. Keeps
+// the access token in localStorage via the shared `localStorageTokenStorage`
+// and exposes `login` / `signup` / `logout` plus the current `user`
+// and `loading` flag. The default admin (`admin@link3.net` / `admin123`)
+// is seeded by the Fastify server.
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ApiError, type AuthSession, type Role, type User } from '@nmc/api-client';
-import { bus } from './bus';
-import { useApi } from './api';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import {
+  bindEndpoints,
+  createClient,
+  isApiError,
+  localStorageTokenStorage,
+  type AuthSession,
+  type NmcApi,
+  type User,
+} from '@nmc/api-client';
 
-type Ctx = {
+interface AuthContextValue {
   user: User | null;
-  session: AuthSession | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthSession>;
-  signup: (email: string, password: string, displayName?: string) => Promise<AuthSession>;
-  logout: () => void;
-  hasRole: (...roles: Role[]) => boolean;
-};
+  /** Resolves once the initial session restore attempt has finished. */
+  ready: boolean;
+  login(email: string, password: string): Promise<void>;
+  signup(email: string, password: string, displayName?: string): Promise<void>;
+  logout(): Promise<void>;
+  /** Re-fetch the current user from the server. */
+  refresh(): Promise<void>;
+}
 
-const AuthContext = createContext<Ctx | null>(null);
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+// One client per browser tab. Empty `baseUrl` + relative `/api/...` paths
+// in `endpoints.ts` mean Vite's dev proxy / same-origin in production.
+function makeApi(): NmcApi {
+  const client = createClient({
+    baseUrl: '',
+    tokenStorage: localStorageTokenStorage,
+  });
+  return bindEndpoints(client);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const api = useApi();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const apiRef = useRef<NmcApi | null>(null);
+  if (!apiRef.current) apiRef.current = makeApi();
+  const api = apiRef.current;
 
-  const [session, setSession] = useState<AuthSession | null>(() => {
-    try {
-      const raw = localStorage.getItem('nmc.auth');
-      return raw ? (JSON.parse(raw) as AuthSession) : null;
-    } catch { return null; }
-  });
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
 
-  // Whenever the session changes, hand the token to the api-client and persist.
+  const applySession = useCallback((session: AuthSession | null) => {
+    setUser(session?.user ?? null);
+  }, []);
+
+  // Restore on mount: if a token is in localStorage, ask the server
+  // who we are. Failures just leave us signed out.
   useEffect(() => {
-    if (session) {
-      localStorage.setItem('nmc.auth', JSON.stringify(session));
-      api.setToken(session.accessToken);
-      bus.emit('nmc:auth:changed', { session });
-    } else {
-      localStorage.removeItem('nmc.auth');
-      api.setToken(null);
-      bus.emit('nmc:auth:changed', { session: null });
-    }
-  }, [session, api]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = await localStorageTokenStorage.getAccessToken();
+        if (!token) return;
+        const me = await api.me();
+        if (!cancelled) setUser(me);
+      } catch {
+        // Token invalid/expired — clear so we don't loop.
+        await localStorageTokenStorage.clear();
+        if (!cancelled) setUser(null);
+      } finally {
+        if (!cancelled) setReady(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [api]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    setLoading(true);
+  const login = useCallback<AuthContextValue['login']>(
+    async (email, password) => {
+      setLoading(true);
+      try {
+        const session = await api.login({ username: email, password });
+        applySession(session);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [api, applySession],
+  );
+
+  const signup = useCallback<AuthContextValue['signup']>(
+    async (email, password, displayName) => {
+      setLoading(true);
+      try {
+        const session = await api.signup({ email, password, displayName });
+        applySession(session);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [api, applySession],
+  );
+
+  const logout = useCallback<AuthContextValue['logout']>(async () => {
+    await api.logout();
+    setUser(null);
+  }, [api]);
+
+  const refresh = useCallback<AuthContextValue['refresh']>(async () => {
     try {
-      const s = await api.login({ username: email, password });
-      setSession(s);
-      const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
-      bus.emit('notify', { id: crypto.randomUUID(), text: `Welcome, ${s.user.name || s.user.email}`, type: 'success', createdAt: new Date().toISOString() });
-      return s;
+      const me = await api.me();
+      setUser(me);
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : 'Login failed';
-      bus.emit('notify', { id: crypto.randomUUID(), text: msg, type: 'danger', createdAt: new Date().toISOString() });
-      throw err;
-    } finally {
-      setLoading(false);
+      if (isApiError(err) && err.status === 401) {
+        await localStorageTokenStorage.clear();
+        setUser(null);
+      } else {
+        throw err;
+      }
     }
-  }, [api, navigate, location.state]);
+  }, [api]);
 
-  const signup = useCallback(async (email: string, password: string, displayName?: string) => {
-    setLoading(true);
-    try {
-      const s = await api.signup({ email, password, ...(displayName ? { displayName } : {}) });
-      setSession(s);
-      navigate('/dashboard', { replace: true });
-      bus.emit('notify', { id: crypto.randomUUID(), text: `Account created — welcome, ${s.user.name || s.user.email}`, type: 'success', createdAt: new Date().toISOString() });
-      return s;
-    } catch (err) {
-      const msg = err instanceof ApiError ? err.message : 'Signup failed';
-      bus.emit('notify', { id: crypto.randomUUID(), text: msg, type: 'danger', createdAt: new Date().toISOString() });
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [api, navigate]);
-
-  const logout = useCallback(() => {
-    setSession(null);
-    navigate('/login', { replace: true });
-  }, [navigate]);
-
-  const hasRole = useCallback((...roles: Role[]) => {
-    if (!session) return false;
-    if (roles.length === 0) return true;
-    return roles.includes(session.user.role);
-  }, [session]);
-
-  const value = useMemo<Ctx>(() => ({
-    user: session?.user ?? null,
-    session,
-    loading,
-    login,
-    signup,
-    logout,
-    hasRole,
-  }), [session, loading, login, signup, logout, hasRole]);
+  const value = useMemo<AuthContextValue>(
+    () => ({ user, loading, ready, login, signup, logout, refresh }),
+    [user, loading, ready, login, signup, logout, refresh],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth(): Ctx {
+export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) {
+    throw new Error('useAuth must be used inside <AuthProvider>.');
+  }
   return ctx;
 }

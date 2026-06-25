@@ -278,6 +278,71 @@ function iigBody(f: IigForm): string {
   ].join('\n');
 }
 
+// ---- Telco POP list (BL / GP / STL) -----------------------------------
+type TelcoVendor = 'BL' | 'GP' | 'STL';
+
+const TELCO_VENDORS: {
+  id: TelcoVendor;
+  short: string;
+  to: string;
+  cc: string;
+}[] = [
+  {
+    id: 'BL',
+    short: 'BL',
+    to: 'noc@banglalink.net',
+    cc: 'bnoc@link3.net; nmc@link3.net',
+  },
+  {
+    id: 'GP',
+    short: 'GP',
+    to: 'noc@grameenphone.com',
+    cc: 'gnoc@link3.net; nmc@link3.net',
+  },
+  {
+    id: 'STL',
+    short: 'STL',
+    to: 'noc@summitcommunications.net',
+    cc: 'snoc@link3.net; nmc@link3.net',
+  },
+];
+
+type TelcoForm = {
+  vendor: TelcoVendor;
+  to: string;
+  cc: string;
+  pop: string;
+  issue: string;
+};
+
+const EMPTY_TELCO: TelcoForm = {
+  vendor: 'BL',
+  to: TELCO_VENDORS[0]!.to,
+  cc: TELCO_VENDORS[0]!.cc,
+  pop: '',
+  issue: '',
+};
+
+function telcoBody(f: TelcoForm): string {
+  const vendor = TELCO_VENDORS.find((v) => v.id === f.vendor);
+  const vendorName = vendor?.short ?? f.vendor;
+  const subject = `Subject: ${vendorName} POP issue – ${f.pop || ''}`.trim();
+  return [
+    `To: ${f.to || '—'}`,
+    `CC: ${f.cc || '—'}`,
+    subject,
+    ``,
+    `Dear ${vendorName} NOC,`,
+    ``,
+    `We are seeing an issue at ${f.pop || '—'}: ${f.issue || '—'}.`,
+    ``,
+    `Kindly check and respond with ETR.`,
+    ``,
+    `Regards,`,
+    `NMC, Link3 Technologies Ltd.`,
+  ].join('\n');
+}
+
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
 }
@@ -353,6 +418,15 @@ export function MailPage() {
       subject: v.defaultSubject,
       body: v.defaultBody,
     });
+  }
+
+  const [telco, setTelco] = useState<TelcoForm>(EMPTY_TELCO);
+  const telcoRendered = useMemo(() => telcoBody(telco), [telco]);
+  // Switching Telco vendor re-applies the default To/CC for that NOC.
+  function pickTelcoVendor(id: TelcoVendor) {
+    const v = TELCO_VENDORS.find((x) => x.id === id);
+    if (!v) return;
+    setTelco((prev) => ({ ...prev, vendor: v.id, to: v.to, cc: v.cc }));
   }
 
   const api = useApi();
@@ -435,17 +509,22 @@ export function MailPage() {
   function send(channel: 'whatsapp' | 'mailto' | 'copy') {
     const isNttn = active === 'nttn';
     const isIig = active === 'iig';
-    const finalBody = isNttn ? nttnRendered : isIig ? iigRendered : body;
+    const isPop = active === 'pop';
+    const finalBody = isNttn ? nttnRendered : isIig ? iigRendered : isPop ? telcoRendered : body;
     const subject = isNttn
       ? `Regarding ${nttn.aEnd || 'A END'} to ${nttn.zEnd || 'Z END'} Connectivity Down`
       : isIig
         ? iig.subject || tpl.label
-        : tpl.label;
+        : isPop
+          ? `${TELCO_VENDORS.find((v) => v.id === telco.vendor)?.short ?? telco.vendor} POP issue – ${telco.pop || ''}`.trim()
+          : tpl.label;
     const mailto = isNttn
       ? `mailto:${(NTTN_VENDORS.find((v) => v.id === nttn.vendor)?.to) ?? ''}?cc=${encodeURIComponent((NTTN_VENDORS.find((v) => v.id === nttn.vendor)?.cc) ?? '')}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(finalBody)}`
       : isIig
         ? `mailto:${iig.to}?cc=${encodeURIComponent(iig.cc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(finalBody)}`
-        : `mailto:?subject=${encodeURIComponent(tpl.label)}&body=${encodeURIComponent(finalBody)}`;
+        : isPop
+          ? `mailto:${telco.to}?cc=${encodeURIComponent(telco.cc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(finalBody)}`
+          : `mailto:?subject=${encodeURIComponent(tpl.label)}&body=${encodeURIComponent(finalBody)}`;
 
     setLog([...log, { id: crypto.randomUUID(), channel, template: tpl.id, createdAt: new Date().toISOString(), body: finalBody } as MailLogEntry]);
     if (channel === 'whatsapp') {
@@ -465,23 +544,28 @@ export function MailPage() {
   async function sendSmtp() {
     const isNttn = active === 'nttn';
     const isIig = active === 'iig';
+    const isPop = active === 'pop';
     const nttnVendor = NTTN_VENDORS.find((v) => v.id === nttn.vendor);
-    const finalBody = isNttn ? nttnRendered : isIig ? iigRendered : body;
+    const finalBody = isNttn ? nttnRendered : isIig ? iigRendered : isPop ? telcoRendered : body;
     const subject = isNttn
       ? `Regarding ${nttn.aEnd || 'A END'} to ${nttn.zEnd || 'Z END'} Connectivity Down`
       : isIig
         ? iig.subject || tpl.label
-        : tpl.label;
-    const to = isNttn ? (nttnVendor?.to ?? '') : isIig ? iig.to : '';
-    const cc = isNttn ? (nttnVendor?.cc ?? '') : isIig ? iig.cc : '';
-    const zone = isNttn ? nttn.vendor : isIig ? iig.vendor : '';
+        : isPop
+          ? `${TELCO_VENDORS.find((v) => v.id === telco.vendor)?.short ?? telco.vendor} POP issue – ${telco.pop || ''}`.trim()
+          : tpl.label;
+    const to = isNttn ? (nttnVendor?.to ?? '') : isIig ? iig.to : isPop ? telco.to : '';
+    const cc = isNttn ? (nttnVendor?.cc ?? '') : isIig ? iig.cc : isPop ? telco.cc : '';
+    const zone = isNttn ? nttn.vendor : isIig ? iig.vendor : isPop ? telco.vendor : '';
 
     if (!to.trim()) {
       bus.emit('notify', {
         id: crypto.randomUUID(),
         text: isIig
           ? 'IIG template has no recipient — pick a vendor or fill the To field.'
-          : 'No recipient address for this template — add one in NTTN_VENDORS first.',
+          : isPop
+            ? 'Telco POP template has no recipient — pick a vendor or fill the To field.'
+            : 'No recipient address for this template — add one in NTTN_VENDORS first.',
         type: 'danger',
         createdAt: new Date().toISOString(),
       });
@@ -688,6 +772,67 @@ export function MailPage() {
 
           <h3 style={{ marginTop: 16 }}>Preview</h3>
           <pre className="ticket-preview">{nttnRendered}</pre>
+          <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            <button className="btn" onClick={() => send('copy')}><IconCopy size={14} /> Copy</button>
+            <button className="btn ghost" onClick={() => send('whatsapp')}><IconShare size={14} /> WhatsApp</button>
+            <button className="btn ghost" onClick={() => send('mailto')}><IconCheck size={14} /> Outlook</button>
+            <button className="btn success" disabled={sending} onClick={sendSmtp}>
+              <IconMail size={14} /> {sending ? 'Sending…' : 'Send via SMTP'}
+            </button>
+          </div>
+        </div>
+      ) : active === 'pop' ? (
+        <div className="card">
+          <h3>Telco POP Issue — pick a telco</h3>
+          <div className="tabs" style={{ marginBottom: 12 }}>
+            {TELCO_VENDORS.map((v) => (
+              <div
+                key={v.id}
+                className={`tab ${telco.vendor === v.id ? 'active' : ''}`}
+                onClick={() => pickTelcoVendor(v.id)}
+              >{v.short}</div>
+            ))}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
+            <label className="field">
+              <span>To</span>
+              <input
+                type="text"
+                value={telco.to}
+                onChange={(e) => setTelco({ ...telco, to: e.target.value })}
+              />
+            </label>
+            <label className="field">
+              <span>CC</span>
+              <input
+                type="text"
+                value={telco.cc}
+                onChange={(e) => setTelco({ ...telco, cc: e.target.value })}
+              />
+            </label>
+            <label className="field">
+              <span>POP / BTS</span>
+              <input
+                type="text"
+                value={telco.pop}
+                placeholder="e.g. BL-DHK-CORE-01"
+                onChange={(e) => setTelco({ ...telco, pop: e.target.value })}
+              />
+            </label>
+            <label className="field">
+              <span>Issue</span>
+              <input
+                type="text"
+                value={telco.issue}
+                placeholder="e.g. power down, link down"
+                onChange={(e) => setTelco({ ...telco, issue: e.target.value })}
+              />
+            </label>
+          </div>
+
+          <h3 style={{ marginTop: 16 }}>Preview</h3>
+          <pre className="ticket-preview">{telcoRendered}</pre>
           <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
             <button className="btn" onClick={() => send('copy')}><IconCopy size={14} /> Copy</button>
             <button className="btn ghost" onClick={() => send('whatsapp')}><IconShare size={14} /> WhatsApp</button>
