@@ -40,6 +40,20 @@ const Env = z.object({
     .default('http://localhost:14268/api/traces'),
 
   UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(25 * 1024 * 1024),
+
+  // --- SMTP (mail delivery) ---
+  // Leave SMTP_HOST empty to disable server-side delivery. The /api/mail/send
+  // endpoint will then return 503 with `error: 'smtp_disabled'`.
+  SMTP_HOST: z.string().default(''),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_SECURE: z
+    .string()
+    .default('false')
+    .transform((v) => v === 'true' || v === '1'),
+  SMTP_USER: z.string().default(''),
+  SMTP_PASSWORD: z.string().default(''),
+  SMTP_FROM_EMAIL: z.string().default('nmc@link3.net'),
+  SMTP_FROM_NAME: z.string().default('NMC, Link3 Technologies Ltd.'),
 });
 
 export type Config = z.infer<typeof Env>;

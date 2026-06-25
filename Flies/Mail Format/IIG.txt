@@ -1,0 +1,84 @@
+
+Summit for IIG Issue :
+
+To:  noc.iig@summitcommunications.net
+
+CC: nmc@link3.net;noc@link3.net;infrastructure@link3.net;helpdesk@link3.net;mtarek@link3.net;corenetwork@link3.net;ngnc@link3.net;bnoc@link3.net;tarek@link3.net;abu.sayeed@summitcommunications.net;corenetwork@link3.net;ngnc@link3.net;bnoc@link3.net;noc.nttn@summitcommunications.net
+
+Subject:  Regarding Dhaka to MUKTAGACHA Connectivity Down
+
+Message format: 
+
+Dear Concern,
+
+Route Name: Dhaka to MUKTAGACHA
+SCR ID: lnk3_161221_028_nb
+Down Time: 20:30 
+
+We are waiting for your response.
+
+
+
+ETL - IIG:
+
+
+To: "Earth Telecommunication (Pvt.) Ltd" <support@earth.net.bd>; "Core Network Earth" <core@earth.net.bd>
+
+CC: "Backoffice Earth" <backoffice@earth.net.bd>; "Bijan Kumar Biswas" <bijan.kumar@earth.net.bd>; "Infrastructure" <infrastructure@link3.net>; "NGNC" <ngnc@link3.net>; "NMR" <nmr@link3.net>; "Ujjal Biswas" <ujjal.biswas@link3.net>; "Subrata Sarker" <subrata.sarker@link3.net>; "NMC" <nmc@link3.net>; "BNOC" <bnoc@link3.net>
+
+
+Subject: Regarding ETL-GGC and FNA link traffic fall
+
+
+
+
+Dear Concern,
+We observed that Earth GGC and FNA link traffic fall from 11:50 AM Please check and share updates with us urgently. 
+
+
+ICONIX IX :
+
+
+To :  soc@level3carrier.com <soc@level3carrier.com>
+
+CC:  rakibul.hassan@link3.net;ujjal.biswas@link3.net;subrata.sarker@link3.net;sabuj.mistry@link3.net;kaiser.shuvo@link3.net;rahman.arifur@link3.net;ngnc@link3.net;nmc@link3.net;bnoc@link3.net
+
+Subject:  Regarding ICONIX_IX traffic fall
+
+Message Format: 
+
+Dear Concern,
+
+Link Name: ICONIX_IX
+Issue: Traffic fall
+Time: 1:00
+
+We are waiting for your reply.
+
+
+STT CDN Cloudflare : 
+
+To :  Tech Support <support.mime@cg-bd.com>; Atiqul Hoque Bappy <atiqul.hoque@cg-bd.com>; Md Asif <asif.md@cg-bd.com>
+CC:  Mahbubur Rahman <mahbubur.rahman@link3.net>; Emran Hossain Bappi <emran.hossain@cg-bd.com>; NMC <nmc@link3.net>; NGNC <ngnc@link3.net>; Ujjal Biswas <ujjal.biswas@link3.net>; Subrata Sarker <subrata.sarker@link3.net>; Arifur Rahman Mojumder <rahman.arifur@link3.net>; Sabuj Mistry <sabuj.mistry@link3.net>; Kaiser Ahmed Shuvo <kaiser.shuvo@link3.net>; Enamul Haque <ena.haque@cg-bd.com>; Mahabubur Rahman <maha.rahman@cg-bd.com>; Humaira Ferdousy <humaira.ferdousy@cg-bd.com>; Shahed Fardous <shahed.fardous@cg-bd.com>; Zahedul Islam <zah.islam@cg-bd.com>; Shidul Alam Kaisar <shidul.alam@cg-bd.com>; Abdullah- Al- Shabbir <abdullah.al@cg-bd.com>; Aman Ullah <aman.ullah@cg-bd.com>; Kazi Rashed Al Islam <kazi.rashed@cg-bd.com>; Islam Hossain <islam.hossain@cg-bd.com>
+
+Subject: Regarding STT CDN Clouflare Traffic Fall
+
+Message Format: 
+
+Dear Concern
+We observed traffic fall in STT CDN Cloudflare from 02:25 to 6:55. Please check and share your observation
+
+BD HUB CDN : 
+
+To : noc@bdhub.com <noc@bdhub.com>; hasibul.islam@bdhub.com <hasibul.islam@bdhub.com>; mmnadim@bdhub.com <mmnadim@bdhub.com>
+CC:  rakibul.hassan@link3.net;ujjal.biswas@link3.net;subrata.sarker@link3.net;sabuj.mistry@link3.net;kaiser.shuvo@link3.net;rahman.arifur@link3.net;ngnc@link3.net;nmc@link3.net;bnoc@link3.net
+
+Subject:  BDHub CDN Traffic Fall
+
+Message format: 
+
+Dear Concern,
+ 
+ 
+We observed that BDHUB-CDN traffic fell from 18:30 to 18:55.Please check and share updates with us urgently.
+

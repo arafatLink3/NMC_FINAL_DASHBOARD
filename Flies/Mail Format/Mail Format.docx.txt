@@ -1,0 +1,103 @@
+﻿F@H:
+
+TO:  noc@fiberathome.net;
+
+CC : nmc@link3.net; noc@link3.net; infrastructure@link3.net; mtarek@link3.net; khayom.parvez@fiberathome.net;
+
+
+
+
+SUB: Regarding Dhaka to Sylhet Connectivity Down
+
+Dear Concern,
+
+We are getting down Dhaka to Sylhet link from 11:32 to till now. Please check and let us know the update urgently.
+
+Route Name : Dhaka to Sylhet
+SCR ID : 41
+
+
+We are waiting for your reply.
+
+
+
+
+
+
+Summit:
+
+
+TO: noc.nttn@summitcommunications.net;
+
+
+CC: nmc@link3.net; noc@link3.net; infrastructure@link3.net; mtarek@link3.net; corenetwork@link3.net; ngnc@link3.net ; bnoc@link3.net; tarek@link3.net; abu.sayeed@summitcommunications.net; corenetwork@link3.net; ngnc@link3.net; noc.nttn@summitcommunications.net;
+
+
+
+
+SUB:  Regarding Dhaka to Sylhet Connectivity Down 
+
+Dear Concern,
+
+We are getting down Dhaka to Sylhet link from 07:01 to till now. Please check and let us know the update urgently.
+
+Route Name : Dhaka to Sylhet
+SCR ID : lnk3_110116_75_nb
+
+We are waiting for your response.
+
+
+
+
+BTCL:
+
+
+TO: noc@btcl.gov.bd; dgm.noc@btcl.gov.bd
+
+
+CC: nmc@link3.net; noc@link3.net; infrastructure@link3.net;corenetwork@link3.net; ngnc@link3.net; bnoc@link3.net; tarek@link3.net;
+
+
+SUB:  Regarding Dhaka to Barisal Connectivity down
+ 
+Dear Concern,
+ 
+We are getting down Dhaka to Barisal link from 15:04 to till now. Please be informed that the link is connected from Gulshan POP.
+ 
+Route Name : 
+VLAN ID     : 
+
+
+We are waiting for your reply.
+
+
+Thanks & Regards,
+
+
+
+
+BAHON: 
+
+To: "noc@bahon.com" <noc@bahon.com> "NOC Bahon Limited" <noc@bahon.com>; support@bahon.com<support@bahon.com>
+
+
+CC: "NMC" <nmc@link3.net>; "NOC" <noc@link3.net>; "Infrastructure" <infrastructure@link3.net>; "Tarekul Islam" <mtarek@link3.net>; "CoreNetwork" <corenetwork@link3.net>; "NGNC" <ngnc@link3.net>; "BNOC" <bnoc@link3.net>; "Tofayel Ahammed" <tofayel.ahammed@link3.net>; "Rakibul Hassan" <rakibul.hassan@link3.net>; "Ujjal Biswas" <ujjal.biswas@link3.net>; "Subrata Sarker" <subrata.sarker@link3.net>; "Bipul Chandra Barai" <bipul.chandra@link3.net>
+
+
+Subject: Regarding Dhaka - Jamgora link down 
+
+Dear Concern,
+We are observing Dhaka to Ashulia Active link again down from 14:20 to till now. Please check and let us know the update urgently.
+ 
+Route Name : Dhaka - Ashulia
+Link ID : LT-BW005 
+
+
+
+
+
+
+
+
+
+

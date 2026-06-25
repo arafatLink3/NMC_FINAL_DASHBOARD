@@ -73,25 +73,57 @@ export function registerDomainRoutes(app: FastifyInstance, db: Knex): void {
     '/api/mail/send',
     { preHandler: [app.requireAuth] },
     async (req, reply) => {
+      if (!app.mailer.enabled) {
+        return reply
+          .code(503)
+          .send({ error: 'smtp_disabled', message: 'SMTP_HOST is not configured on the server' });
+      }
+
       const parsed = z
         .object({
+          template: z.string().min(1).optional(),
+          zone: z.string().optional(),
           to: z.string().min(1),
+          cc: z.string().optional(),
+          bcc: z.string().optional(),
           subject: z.string().min(1),
           body: z.string().min(1),
-          zone: z.string().optional(),
+          senderEmail: z.string().email().optional(),
+          senderName: z.string().min(1).max(120).optional(),
         })
         .safeParse(req.body);
       if (!parsed.success) return reply.code(400).send({ error: 'bad_input' });
+
+      const result = await app.mailer.send({
+        to: parsed.data.to,
+        cc: parsed.data.cc,
+        bcc: parsed.data.bcc,
+        subject: parsed.data.subject,
+        body: parsed.data.body,
+        senderEmail: parsed.data.senderEmail,
+        senderName: parsed.data.senderName,
+      });
+
       const [id] = await db('mail_messages').insert({
         zone: parsed.data.zone ?? null,
-        status: 'sent',
+        status: result.ok ? 'sent' : 'failed',
         data: JSON.stringify({
+          template: parsed.data.template ?? null,
           to: parsed.data.to,
+          cc: parsed.data.cc ?? null,
+          bcc: parsed.data.bcc ?? null,
           subject: parsed.data.subject,
           body: parsed.data.body,
+          messageId: result.messageId,
+          error: result.error,
+          accepted: result.accepted,
+          sentBy: req.user?.username ?? null,
         }),
       });
       const row = await db('mail_messages').where({ id }).first();
+      if (!result.ok) {
+        return reply.code(502).send({ error: 'smtp_send_failed', message: result.error, log: row });
+      }
       return reply.code(201).send(row);
     }
   );

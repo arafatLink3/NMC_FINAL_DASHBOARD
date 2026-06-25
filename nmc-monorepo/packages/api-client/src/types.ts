@@ -277,11 +277,20 @@ export interface ContactLearnInput {
 }
 
 export interface MailSendInput {
-  template: 'NTTN' | 'IIG' | 'TelcoPOP' | 'BRAS' | 'Weekly' | 'Monthly';
+  template: 'NTTN' | 'IIG' | 'TelcoPOP' | 'BRAS' | 'Weekly' | 'Monthly' | string;
+  /** Subject line (overrides the template default if supplied). */
+  subject?: string;
+  /** Comma- or semicolon-separated recipient list. The server splits on both. */
+  to?: string;
+  cc?: string;
+  bcc?: string;
   zone?: string;
   body?: string;
   recipients?: string[];
-  via?: 'mailto' | 'whatsapp' | 'copy';
+  via?: 'mailto' | 'whatsapp' | 'copy' | 'smtp';
+  /** Override the configured sender identity for this send only. */
+  senderEmail?: string;
+  senderName?: string;
 }
 
 export interface BrasImportResult {

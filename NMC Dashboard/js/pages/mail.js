@@ -157,47 +157,52 @@ NMC`,
         { id: 'm_top', label: 'Top interfaces' }
       ]
     },
+    // F@H  (uses SCR ID as the unique identifier)
     fh: {
       label: 'F@H (Fiber@Home)',
       provider: true,
-      to: 'noc@fh.com.bd',
-      cc: 'nmc@bahon.com.bd',
-      subject: 'F@H link issue – {link}',
-      message: `Dear F@H NOC,
+      to: 'noc@fiberathome.net',
+      cc: 'nmc@link3.net; noc@link3.net; infrastructure@link3.net; mtarek@link3.net; khayom.parvez@fiberathome.net',
+      subject: 'Regarding {route} Connectivity Down',
+      message: `Dear Concern,
 
-We are observing an issue on link {link} since {time}.
+We are getting down {route} link from {time} to till now. Please check and let us know the update urgently.
 
-Issue: {issue}
-Impact: {impact}
+Route Name : {route}
+SCR ID      : {scr}
 
-Please check and provide ETR.
+We are waiting for your reply.
 
 Regards,
 NMC`,
       fields: [
-        { id: 'm_link', label: 'Link / POP' },
-        { id: 'm_time', label: 'Fault time' },
-        { id: 'm_issue', label: 'Issue' },
-        { id: 'm_impact', label: 'Impact' }
+        { id: 'm_route', label: 'Route (e.g. Dhaka to Sylhet)' },
+        { id: 'm_time',  label: 'Down time (HH:MM)' },
+        { id: 'm_scr',   label: 'SCR ID', placeholder: 'e.g. 41' }
       ]
     },
+    // Summit  (uses SCR ID as the unique identifier)
     summit: {
       label: 'Summit Communications',
       provider: true,
-      to: 'noc@summitcommunications.net',
-      cc: 'nmc@bahon.com.bd',
-      subject: 'Summit POP issue – {pop}',
-      message: `Dear Summit NOC,
+      to: 'noc.nttn@summitcommunications.net',
+      cc: 'nmc@link3.net; noc@link3.net; infrastructure@link3.net; mtarek@link3.net; corenetwork@link3.net; ngnc@link3.net; bnoc@link3.net; tarek@link3.net; abu.sayeed@summitcommunications.net',
+      subject: 'Regarding {route} Connectivity Down',
+      message: `Dear Concern,
 
-We are seeing an issue at POP {pop}: {issue}.
+We are getting down {route} link from {time} to till now. Please check and let us know the update urgently.
 
-Please investigate and update.
+Route Name : {route}
+SCR ID      : {scr}
+
+We are waiting for your response.
 
 Regards,
 NMC`,
       fields: [
-        { id: 'm_pop', label: 'POP / Link' },
-        { id: 'm_issue', label: 'Issue' }
+        { id: 'm_route', label: 'Route (e.g. Dhaka to Sylhet)' },
+        { id: 'm_time',  label: 'Down time (HH:MM)' },
+        { id: 'm_scr',   label: 'SCR ID', placeholder: 'e.g. lnk3_110116_75_nb' }
       ]
     },
     bl: {
@@ -238,42 +243,53 @@ NMC`,
         { id: 'm_issue', label: 'Issue' }
       ]
     },
+    // BTCL  (uses VLAN ID as the unique identifier)
     btcl: {
       label: 'BTCL',
       provider: true,
-      to: 'noc@btcl.gov.bd',
-      cc: 'nmc@bahon.com.bd',
-      subject: 'BTCL link issue – {link}',
-      message: `Dear BTCL NOC,
+      to: 'noc@btcl.gov.bd; dgm.noc@btcl.gov.bd',
+      cc: 'nmc@link3.net; noc@link3.net; infrastructure@link3.net; corenetwork@link3.net; ngnc@link3.net; bnoc@link3.net; tarek@link3.net',
+      subject: 'Regarding {route} Connectivity down',
+      message: `Dear Concern,
 
-Reporting an issue on {link}: {issue}.
+We are getting down {route} link from {time} to till now. Please be informed that the link is connected from {pop}.
 
-Please investigate and update.
+Route Name : {route}
+VLAN ID     : {vlan}
 
-Regards,
+We are waiting for your reply.
+
+Thanks & Regards,
 NMC`,
       fields: [
-        { id: 'm_link', label: 'Link / Circuit' },
-        { id: 'm_issue', label: 'Issue' }
+        { id: 'm_route', label: 'Route (e.g. Dhaka to Barisal)' },
+        { id: 'm_time',  label: 'Down time (HH:MM)' },
+        { id: 'm_pop',   label: 'Connected from POP', placeholder: 'e.g. Gulshan POP' },
+        { id: 'm_vlan',  label: 'VLAN ID', placeholder: 'e.g. 1042' }
       ]
     },
+    // Bahon  (uses Link ID as the unique identifier)
     bahon: {
       label: 'BAHON (Internal)',
       provider: true,
-      to: 'noc@bahon.com.bd',
-      cc: 'nmc@bahon.com.bd',
-      subject: 'BAHON internal – {subject}',
-      message: `Hi Team,
+      to: 'noc@bahon.com; support@bahon.com',
+      cc: 'nmc@link3.net; noc@link3.net; infrastructure@link3.net; mtarek@link3.net; corenetwork@link3.net; ngnc@link3.net; bnoc@link3.net; tofayel.ahammed@link3.net; rakibul.hassan@link3.net; ujjal.biswas@link3.net; subrata.sarker@link3.net; bipul.chandra@link3.net',
+      subject: 'Regarding {route} link down',
+      message: `Dear Concern,
 
-Reporting internal BAHON update: {subject}.
+We are observing {route} link again down from {time} to till now. Please check and let us know the update urgently.
 
-Details: {details}
+Route Name : {route}
+Link ID     : {link}
+
+We are waiting for your reply.
 
 Regards,
 NMC`,
       fields: [
-        { id: 'm_subject', label: 'Subject' },
-        { id: 'm_details', label: 'Details' }
+        { id: 'm_route', label: 'Route (e.g. Dhaka - Ashulia)' },
+        { id: 'm_time',  label: 'Down time (HH:MM)' },
+        { id: 'm_link',  label: 'Link ID', placeholder: 'e.g. LT-BW005' }
       ]
     },
     etl_iig: {

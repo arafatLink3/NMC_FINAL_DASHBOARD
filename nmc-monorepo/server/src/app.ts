@@ -19,10 +19,13 @@ import { BrasRepository } from './modules/bras/repository.js';
 import { registerBrasController } from './modules/bras/controller.js';
 import { registerAiRoutes } from './modules/ai/routes.js';
 import { registerDomainRoutes } from './modules/domain-routes.js';
+import { Mailer } from './modules/mail/mailer.js';
 
 export interface AppDeps {
   config: Config;
   db: Knex;
+  /** Optional pre-built Mailer (tests pass a stub). */
+  mailer?: Mailer;
 }
 
 // The api-client and the legacy SPA call `/api/auth/*`, but the
@@ -96,6 +99,11 @@ export async function buildFastify(deps: AppDeps): Promise<FastifyInstance> {
     time: new Date().toISOString(),
   }));
 
+  // SMTP transport — built once per process. /api/mail/send uses this
+  // when the operator hits the new "Send" button on the dashboard.
+  const mailer = deps.mailer ?? new Mailer(config);
+  app.decorate('mailer', mailer);
+
   const loginHandler = async (req: any, reply: any) => {
     const parsed = LoginBody.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: 'bad_input' });
@@ -163,4 +171,11 @@ export async function buildFastify(deps: AppDeps): Promise<FastifyInstance> {
   registerDomainRoutes(app, db);
 
   return app;
+}
+
+/** Module augmentation so `app.mailer` is type-safe across the codebase. */
+declare module 'fastify' {
+  interface FastifyInstance {
+    mailer: Mailer;
+  }
 }
