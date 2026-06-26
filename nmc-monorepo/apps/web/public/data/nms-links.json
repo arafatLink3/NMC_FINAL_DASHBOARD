@@ -1,0 +1,86 @@
+[
+  {
+    "id": "whatsupgold",
+    "name": "WhatsUpGold",
+    "url": "http://10.20.20.243/NmConsole/?g=(73bbd44a-69ad-48ab-acbe-83c0f6ddc0f0)",
+    "category": "NMS",
+    "desc": "Network monitoring dashboard"
+  },
+  {
+    "id": "zabbix",
+    "name": "Zabbix",
+    "url": "http://10.20.20.36/zabbix/",
+    "category": "NMS",
+    "desc": "Network monitoring & alerting"
+  },
+  {
+    "id": "cacti",
+    "name": "Cacti",
+    "url": "http://10.20.20.91/cacti/",
+    "category": "NMS",
+    "desc": "Network graphing (Poller)"
+  },
+  {
+    "id": "corero",
+    "name": "Corero",
+    "url": "https://cloud.corero.com/grafana",
+    "category": "Security",
+    "desc": "DDoS mitigation console"
+  },
+  {
+    "id": "nexusguard",
+    "name": "Nexusguard",
+    "url": "https://portal.nexusguard.com/",
+    "category": "Security",
+    "desc": "DDoS scrubbing portal"
+  },
+  {
+    "id": "nce-ip",
+    "name": "NCE-IP",
+    "url": "http://10.20.20.181:8084",
+    "category": "NCE",
+    "desc": "NCE-IP radio controller"
+  },
+  {
+    "id": "fastnetmon",
+    "name": "FastNetMon",
+    "url": "http://10.20.20.51:8080",
+    "category": "NMS",
+    "desc": "BGP / flow anomaly detection"
+  },
+  {
+    "id": "observium",
+    "name": "Observium",
+    "url": "https://observium.omicron-bd.com/",
+    "category": "NMS",
+    "desc": "Auto-discovery network monitor"
+  },
+  {
+    "id": "outlook",
+    "name": "Outlook (Web)",
+    "url": "https://outlook.office365.com/",
+    "category": "Office",
+    "desc": "Corporate mail"
+  },
+  {
+    "id": "whatsapp",
+    "name": "WhatsApp Web",
+    "url": "https://web.whatsapp.com/",
+    "category": "Office",
+    "desc": "Quick chat from the desk"
+  },
+  {
+    "id": "quickcall",
+    "name": "QuickCall",
+    "url": "http://10.20.20.42/quickcall/",
+    "category": "Office",
+    "desc": "Internal call/paging console"
+  },
+  {
+    "id": "nagios",
+    "name": "Nagios",
+    "url": "https://nagios.omicron-bd.com/nagios/",
+    "category": "NMS",
+    "desc": "Service & host availability"
+  }
+]

@@ -621,3 +621,15 @@ tr.st-row-locked:hover td { filter: brightness(1.05); }
   font-size: 11.5px; font-weight: 500; background: var(--surface-3);
   color: var(--text); border: 1px solid var(--border); }
 .data button[data-learn] { padding: 2px 8px; font-size: 11.5px; }
+
+/* BRAS database grid — keeps the 11 columns readable on wide screens and
+   tight on small ones. Identical to the legacy NMC Dashboard table. */
+table.data.bras-grid { table-layout: auto; min-width: 1180px; }
+table.data.bras-grid thead th { position: sticky; top: 0; z-index: 1;
+  background: var(--surface-2); font-size: 11.5px; text-transform: uppercase;
+  letter-spacing: .03em; color: var(--muted); }
+table.data.bras-grid tbody tr:hover { background: var(--surface-3); }
+table.data.bras-grid tbody td { vertical-align: middle; }
+
+/* NMS quick-links card — sub-text under the description. */
+.nms-url { font-size: 11.5px; color: var(--muted); margin-top: 6px; opacity: .85; }

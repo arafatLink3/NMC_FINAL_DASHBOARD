@@ -44,16 +44,36 @@ export interface ParsedTicket {
   laser: { rx?: string; tx?: string };
 }
 
+/**
+ * Legacy NMC Dashboard contact shape (mirrors `js/pages/contacts.js`):
+ *   { id, name, role, dept, rawDept, organization, zone, phone, email,
+ *     ipPhone, id_val, source, tags, notes, createdAt, updatedAt }
+ *
+ * The contact page also surfaces a Google-Sheet CSV with these columns:
+ *   Department, Name, Designation, Phone Number, Escalation, ID, Area, IP Phone
+ */
 export interface ContactRecord {
   id: string;
   name?: string;
+  /** Legacy alias — Google Sheet column "Designation". */
   role?: string;
+  /** Canonical department key (NMC / NGNC / BNOC / S&T / BTS & Power / NCSS-* / Others-*). */
   dept?: string;
+  /** Raw, free-form department string as imported (preserved for round-tripping). */
+  rawDept?: string;
+  /** Legacy alias — Google Sheet column "Area". */
+  organization?: string;
   zone?: string;
   district?: string;
   bts?: string;
   phone?: string;
   email?: string;
+  /** Legacy — Google Sheet column "IP Phone". */
+  ipPhone?: string;
+  /** Legacy — Google Sheet column "ID" (employee/vendor id, not the row id). */
+  id_val?: string;
+  /** Source tag — 'sheet' (Google Sheet import) or 'manual'. */
+  source?: 'sheet' | 'manual' | string;
   tags?: string[];
   /** Free-form notes for legacy import. */
   notes?: string;
