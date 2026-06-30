@@ -11,16 +11,28 @@ import type { ApiClient } from './client.js';
 import type { ContactRecord } from '@nmc/ai';
 import type {
   AuthSession,
+  AttachmentMeta,
+  AzureStartResponse,
+  AzureStatusResponse,
   BrasImportResult,
   BrasRecord,
   CcbRecord,
   ClassifyResponse,
   ContactLearnInput,
+  DeleteMailInput,
+  FetchMailQuery,
+  FetchMailResponse,
+  FetchedMail,
   IncidentRecord,
+  ListAttachmentsResponse,
+  ListMailQuery,
+  ListMailResponse,
   ListQuery,
   LoginInput,
+  MailCountResponse,
   MailLogEntry,
   MailSendInput,
+  MarkReadInput,
   NmsLink,
   Paginated,
   ParseTicketResponse,
@@ -32,6 +44,9 @@ import type {
   Settings,
   SignupInput,
   TicketRecord,
+  TrainInput,
+  TrainResponse,
+  UploadResponse,
   User,
 } from './types.js';
 
@@ -42,12 +57,18 @@ export interface NmcApi {
   logout(): Promise<void>;
   refresh(): Promise<AuthSession>;
   me(): Promise<User>;
+  /** True when AZURE_TENANT_ID + AZURE_CLIENT_ID + AZURE_CLIENT_SECRET are set. */
+  azureStatus(): Promise<AzureStatusResponse>;
+  /** Mint the Azure AD authorize URL the browser should be redirected to. */
+  azureStart(returnTo?: string): Promise<AzureStartResponse>;
 
   // AI helpers (proxy to server-side rules engine; falls back to local)
   parseTicket(raw: string): Promise<ParseTicketResponse>;
   classify(text: string): Promise<ClassifyResponse>;
   rules(): Promise<RulesResponse>;
   rosterAt(q: RosterQuery): Promise<RosterResponse>;
+  /** Persist a (category, department) override that survives restarts. */
+  train(input: TrainInput): Promise<TrainResponse>;
 
   // tickets
   listTickets(q?: ListQuery): Promise<Paginated<TicketRecord>>;
@@ -96,10 +117,23 @@ export interface NmcApi {
   // mail
   listMailLog(q?: ListQuery): Promise<Paginated<MailLogEntry>>;
   sendMail(input: MailSendInput): Promise<MailLogEntry>;
+  fetchMail(q?: FetchMailQuery): Promise<FetchMailResponse>;
+  /** Read cached mail from the server DB. Use this for the inbox table; use
+   *  fetchMail() to trigger a fresh IMAP ingest. */
+  listMail(q?: ListMailQuery): Promise<ListMailResponse>;
+  /** Count of non-deleted cached rows for KPI tiles. */
+  mailCount(mailbox?: string): Promise<MailCountResponse>;
+  markMailRead(input: MarkReadInput): Promise<FetchedMail>;
+  deleteMail(input: DeleteMailInput): Promise<void>;
+  /** List attachments persisted for a single fetched mail row. */
+  listMailAttachments(uid: number, mailbox?: string): Promise<ListAttachmentsResponse>;
 
   // settings
   getSettings(): Promise<Settings>;
   updateSettings(patch: Partial<Settings>): Promise<Settings>;
+
+  // attachments (MinIO / S3)
+  uploadAttachment(file: { name: string; data: ArrayBuffer | Blob; contentType?: string }): Promise<UploadResponse>;
 }
 
 export function bindEndpoints(c: ApiClient): NmcApi {
@@ -143,12 +177,15 @@ export function bindEndpoints(c: ApiClient): NmcApi {
       return session;
     },
     me: () => c.get<User>('/api/auth/me'),
+    azureStatus: () => c.get<AzureStatusResponse>('/api/auth/azure/status'),
+    azureStart:  (returnTo) => c.get<AzureStartResponse>('/api/auth/azure/start', returnTo ? { return_to: returnTo } : undefined),
 
     // AI helpers ──────────────────────────────────────────────────────
     parseTicket: (raw) => c.post<ParseTicketResponse>('/api/ai/parse', { raw }),
     classify:    (text) => c.post<ClassifyResponse>('/api/ai/classify', { text }),
     rules:       () => c.get<RulesResponse>('/api/ai/rules'),
     rosterAt:    (q) => c.get<RosterResponse>('/api/ai/roster', q as Record<string, unknown>),
+    train:       (input) => c.post<TrainResponse>('/api/ai/train', input),
 
     // tickets ─────────────────────────────────────────────────────────
     listTickets:   (q) => c.get<Paginated<TicketRecord>>('/api/tickets', q),
@@ -204,9 +241,33 @@ export function bindEndpoints(c: ApiClient): NmcApi {
     // mail ────────────────────────────────────────────────────────────
     listMailLog:     (q) => c.get<Paginated<MailLogEntry>>('/api/mail/log', q),
     sendMail:        (i) => c.post<MailLogEntry>('/api/mail/send', i),
+    fetchMail:       (q) => c.get<FetchMailResponse>('/api/mail/fetch', q as Record<string, unknown>),
+    listMail:        (q) => c.get<ListMailResponse>('/api/mail/list', q as Record<string, unknown>),
+    mailCount:       (mailbox) => c.get<MailCountResponse>('/api/mail/count', mailbox ? { mailbox } : undefined),
+    markMailRead:    (i) => c.post<FetchedMail>('/api/mail/read', i),
+    deleteMail:      async (i) => {
+      await c.delete<void>(
+        `/api/mail/${encodeURIComponent(String(i.uid))}`,
+        i.mailbox ? { mailbox: i.mailbox } : undefined,
+      );
+    },
+    listMailAttachments: (uid, mailbox) =>
+      c.get<ListAttachmentsResponse>(
+        `/api/mail/${encodeURIComponent(String(uid))}/attachments`,
+        mailbox ? { mailbox } : undefined,
+      ),
 
     // settings ────────────────────────────────────────────────────────
     getSettings:     () => c.get<Settings>('/api/settings'),
     updateSettings:  (patch) => c.patch<Settings>('/api/settings', patch),
+
+    // attachments ─────────────────────────────────────────────────────
+    uploadAttachment: async (file) => {
+      const fd = new FormData();
+      const blob = file.data instanceof Blob ? file.data : new Blob([file.data as ArrayBuffer]);
+      fd.append('file', blob, file.name);
+      if (file.contentType) fd.append('contentType', file.contentType);
+      return c.post<UploadResponse>('/api/attachments', fd);
+    },
   };
 }

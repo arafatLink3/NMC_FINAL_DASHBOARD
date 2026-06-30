@@ -1,0 +1,58 @@
+# render.yaml — Render Blueprint for the Fastify server.
+# Render picks up the Dockerfile at server/Dockerfile when you connect the repo.
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: nmc-server
+    runtime: docker
+    rootDir: server
+    dockerfilePath: ./Dockerfile
+    dockerContext: ..
+    plan: starter
+    region: oregon
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: HOST
+        value: 0.0.0.0
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_CLIENT
+        value: pg
+      - key: DATABASE_URL
+        sync: false          # set in Render dashboard → secret
+      - key: DATABASE_DIRECT_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generate: true
+      - key: JWT_REFRESH_SECRET
+        generate: true
+      - key: CORS_ORIGIN
+        value: https://nmc.example.com
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: RUN_SEED
+        value: "false"
+      - key: OUTLOOK_SMTP_HOST
+        value: smtp.office365.com
+      - key: OUTLOOK_SMTP_PORT
+        value: "587"
+      - key: OUTLOOK_SMTP_USER
+        sync: false
+      - key: OUTLOOK_SMTP_PASS
+        sync: false
+      - key: OUTLOOK_IMAP_HOST
+        value: outlook.office365.com
+      - key: OUTLOOK_IMAP_PORT
+        value: "993"
+      - key: OUTLOOK_IMAP_USER
+        sync: false
+      - key: OUTLOOK_IMAP_PASS
+        sync: false
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        sync: false

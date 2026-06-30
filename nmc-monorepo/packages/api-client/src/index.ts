@@ -73,4 +73,25 @@ export type {
   RosterQuery,
   RosterResponse,
   ContactLearnInput,
+  // IMAP fetch
+  FetchedAddress,
+  FetchedMail,
+  FetchMailQuery,
+  FetchMailResponse,
+  MarkReadInput,
+  DeleteMailInput,
+  ListMailQuery,
+  ListMailResponse,
+  MailCountResponse,
+  // AI training
+  TrainInput,
+  TrainResponse,
+  // Object storage
+  AttachmentMeta,
+  ListAttachmentsResponse,
+  UploadResponse,
+  // Azure AD / Entra ID SSO
+  AzureStatusResponse,
+  AzureStartResponse,
+  AzureProfile,
 } from './types.js';

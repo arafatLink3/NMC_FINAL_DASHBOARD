@@ -5,16 +5,19 @@ import { LineChart, PieChart } from '../components/Charts';
 import { useCollection } from '../lib/store';
 import { bus } from '../lib/bus';
 import { fmtDMYHM, fmtLongDuration, durationBetween } from '../lib/format';
-import type { IncidentRecord } from '@nmc/api-client';
+import type { IncidentRecord, CcbRecord } from '@nmc/api-client';
 
 type Reminder = { id: string; text: string; minutes: number; danger?: boolean };
+type UpcomingItem = { id: string; text: string; startsIn: number; kind: 'incident' | 'ccb' };
 
 function startOfDay(d: Date) { const c = new Date(d); c.setHours(0, 0, 0, 0); return c; }
 
 export function DashboardPage() {
   const [incidents] = useCollection<IncidentRecord>('incidents');
+  const [ccb] = useCollection<CcbRecord>('ccb');
   const [tick, setTick] = useState(0);
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
 
   // re-render every minute so "running" durations stay current
   useEffect(() => {
@@ -83,6 +86,42 @@ export function DashboardPage() {
     setReminders(out.slice(0, 8));
   }, [incidents, now, tick]);
 
+  // 1-hr reminders: incidents or CCBs starting within the next 60 minutes
+  useEffect(() => {
+    const out: UpcomingItem[] = [];
+    const horizon = new Date(now.getTime() + 60 * 60 * 1000);
+    for (const inc of incidents) {
+      if (!inc.faultTime) continue;
+      const start = new Date(inc.faultTime);
+      if (start <= now || start > horizon) continue;
+      // Only flag if the incident is still open
+      const isOpen = !inc.solved || inc.solved === '' || (inc.endTime && new Date(inc.endTime) > now);
+      if (!isOpen) continue;
+      const mins = Math.floor((start.getTime() - now.getTime()) / 60000);
+      out.push({
+        id: `inc-${inc.id}`,
+        text: `${inc.incidentName || inc.subCategory || inc.category} starts at ${fmtDMYHM(inc.faultTime!)}`,
+        startsIn: mins,
+        kind: 'incident',
+      });
+    }
+    for (const c of ccb) {
+      if (!c.start) continue;
+      const start = new Date(c.start);
+      if (start <= now || start > horizon) continue;
+      if (c.status && /^(closed|completed|expired|cancelled|canceled)/i.test(c.status)) continue;
+      const mins = Math.floor((start.getTime() - now.getTime()) / 60000);
+      out.push({
+        id: `ccb-${c.id}`,
+        text: `CCB ${c.title || c.name || c.id} (${c.type || 'change'}) starts at ${fmtDMYHM(c.start!)}`,
+        startsIn: mins,
+        kind: 'ccb',
+      });
+    }
+    out.sort((a, b) => a.startsIn - b.startsIn);
+    setUpcoming(out.slice(0, 8));
+  }, [incidents, ccb, now, tick]);
+
   return (
     <div>
       <h2 style={{ margin: '4px 0 12px' }}>Dashboard</h2>
@@ -130,6 +169,21 @@ export function DashboardPage() {
               <span>⏰</span>
               <span style={{ flex: 1 }}>{r.text}</span>
               <button className="btn ghost sm" onClick={() => snooze(r.id)}>Snooze 1h</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card">
+        <h3>1-hr reminders</h3>
+        {upcoming.length === 0 && <div className="empty">Nothing scheduled in the next hour.</div>}
+        {upcoming.map((u) => (
+          <div key={u.id} className="reminder" style={{ borderLeftColor: u.kind === 'ccb' ? 'var(--warn)' : 'var(--info)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>{u.kind === 'ccb' ? '🛠' : '⚠'}</span>
+              <span className="tag p">{u.kind === 'ccb' ? 'CCB' : 'Incident'}</span>
+              <span style={{ flex: 1 }}>{u.text}</span>
+              <span className="tag b">in {u.startsIn}m</span>
             </div>
           </div>
         ))}

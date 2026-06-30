@@ -12,14 +12,21 @@ type Ctx = NmcApi & {
 
 const ApiContext = createContext<Ctx | null>(null);
 
+// Two storage keys:
+//   - `nmc.apiBase`     legacy override (kept for backward-compat).
+//   - `nmc.apiBase.url` the explicit URL the operator typed into Settings.
+// In the SPA dev build the Vite proxy forwards `/api/*` and `/auth/*` to the
+// Fastify server, so empty baseUrl (= same-origin) is always correct. We
+// only honor an explicit override when it is an http(s) URL — anything else
+// (a stale empty string from a prior session, a typo, a leftover 'null',
+// etc.) falls back to same-origin so the page can never get stuck on a
+// dead URL like the browser history used to.
 function readBaseUrl(): string {
-  if (typeof window === 'undefined') return 'http://localhost:4000';
-  const fromStorage = localStorage.getItem('nmc.apiBase');
-  if (fromStorage) return fromStorage;
-  // The endpoint paths in @nmc/api-client are absolute (e.g. '/api/auth/login'),
-  // so we keep baseUrl empty and let them render as-is. The Vite dev server
-  // proxies /api/* to Fastify, and in production the same origin serves /api.
-  // Relative URLs (no host) keep the request same-origin → no CORS preflight.
+  if (typeof window === 'undefined') return '';
+  const explicit = localStorage.getItem('nmc.apiBase.url') ?? '';
+  if (/^https?:\/\//i.test(explicit)) return explicit.replace(/\/+$/, '');
+  const legacy = localStorage.getItem('nmc.apiBase') ?? '';
+  if (/^https?:\/\//i.test(legacy)) return legacy.replace(/\/+$/, '');
   return '';
 }
 
@@ -41,9 +48,17 @@ export function ApiProvider({ children }: { children: ReactNode }) {
       },
       setBaseUrl: (url) => {
         baseRef.current = url;
-        localStorage.setItem('nmc.apiBase', url);
-        // re-create the client so the new base takes effect
-        const next = createClient({ baseUrl: url });
+        // Persist the operator's explicit override under a dedicated key.
+        // Empty / non-http values are accepted (clears the override) so
+        // the SPA falls back to the same-origin / Vite proxy path.
+        if (/^https?:\/\//i.test(url)) {
+          localStorage.setItem('nmc.apiBase.url', url.replace(/\/+$/, ''));
+        } else {
+          localStorage.removeItem('nmc.apiBase.url');
+        }
+        // Also clear the legacy key so a previous bad value can't resurface.
+        localStorage.removeItem('nmc.apiBase');
+        const next = createClient({ baseUrl: url || '' });
         Object.assign(clientRef.current, next);
       },
     } as Ctx;

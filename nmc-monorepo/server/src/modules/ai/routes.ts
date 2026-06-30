@@ -23,6 +23,7 @@ import {
   suggestContact,
   learnContact,
 } from '@nmc/ai';
+import { AiTrainingRepository } from './training.js';
 
 const ParseTicketBody = z.object({ text: z.string().min(1) });
 const ClassifyBody = z.object({
@@ -50,7 +51,7 @@ const LearnContactBody = z.object({
   contactId: z.string().min(1),
 });
 
-export function registerAiRoutes(app: FastifyInstance): void {
+export function registerAiRoutes(app: FastifyInstance, training: AiTrainingRepository): void {
   // /parse-contact kept as a back-compat alias — the legacy SPA calls it.
   const handleParseTicket = async (
     req: { body: unknown },
@@ -68,13 +69,40 @@ export function registerAiRoutes(app: FastifyInstance): void {
   app.post('/api/ai/classify', async (req, reply) => {
     const parsed = ClassifyBody.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: 'bad_input' });
-    return reply.send(classify(parsed.data.category, parsed.data.text));
+    const result = classify(parsed.data.category, parsed.data.text);
+    // If an operator has previously trained this category, prefer the
+    // learned department / sub-category over the rule engine.
+    const override = await training.forCategory(parsed.data.category || (result as { category?: string }).category || '');
+    if (override) {
+      return reply.send({ ...result, department: override.department, trained: true });
+    }
+    return reply.send({ ...result, trained: false });
   });
 
   app.post('/api/ai/learn', async (req, reply) => {
     const parsed = LearnBody.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: 'bad_input' });
     return reply.send(learn(parsed.data.current, parsed.data.category, parsed.data.dept));
+  });
+
+  // POST /api/ai/train — persist a (category, department, subCategory?)
+  // override. Replaces the legacy localStorage 'nmc.aiTraining' key.
+  const TrainBody = z.object({
+    category: z.string().min(1),
+    department: z.string().min(1),
+    subCategory: z.string().optional(),
+  });
+  app.post('/api/ai/train', async (req, reply) => {
+    const parsed = TrainBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: 'bad_input' });
+    const record = await training.upsert(parsed.data);
+    return reply.send(record);
+  });
+
+  // GET /api/ai/training — return all overrides for the admin view.
+  app.get('/api/ai/training', async (_req, reply) => {
+    const rows = await training.all();
+    return reply.send({ rows, total: rows.length });
   });
 
   app.post('/api/ai/parse-roster', async (req, reply) => {

@@ -2,12 +2,16 @@
 // Direct port of the legacy `NMC Dashboard/js/pages/contacts.js` (global
 // department tree, Google-Sheet CSV sync, AI search + reinforcement, edit
 // modal, sheet-meta footer line) onto React + the existing store/AI/bus.
+// 👍/👎 reinforcement mirrors the design.html section 5.3 — the local
+// nmc.contactLearn map is mirrored to the server via /api/contacts/learn
+// so other operators see the same learned ranking.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCollection } from '../lib/store';
 import { suggestContact, learnContact } from '@nmc/ai';
 import { IconSearch, IconPlus, IconCheck, IconTrash, IconX, IconDownload } from '../lib/icons';
 import { bus } from '../lib/bus';
+import { useApi } from '../lib/api';
 import type { ContactRecord } from '@nmc/api-client';
 
 // ---------------------------------------------------------------------------
@@ -213,9 +217,13 @@ function writeSheetMeta(m: SheetMeta) {
 // Page
 // ---------------------------------------------------------------------------
 export function ContactsPage() {
+  const api = useApi();
   const [rows, setRows] = useCollection<ContactRecord>('contacts');
   const [learnMap, setLearnMap] = useState<Record<string, string>>(() => {
     try { return JSON.parse(localStorage.getItem('nmc.contactLearn') || '{}'); } catch { return {}; }
+  });
+  const [negativeMap, setNegativeMap] = useState<Record<string, string>>(() => {
+    try { return JSON.parse(localStorage.getItem('nmc.contactDownrank') || '{}'); } catch { return {}; }
   });
 
   // Mirror legacy `render._activeDept` / `render._open` / `render._expanded`
@@ -236,6 +244,9 @@ export function ContactsPage() {
   useEffect(() => {
     try { localStorage.setItem('nmc.contactLearn', JSON.stringify(learnMap)); } catch { /* ignore */ }
   }, [learnMap]);
+  useEffect(() => {
+    try { localStorage.setItem('nmc.contactDownrank', JSON.stringify(negativeMap)); } catch { /* ignore */ }
+  }, [negativeMap]);
 
   // Active department node label (drives the dropdown trigger text).
   const activeLabel = useMemo(() => {
@@ -266,15 +277,29 @@ export function ContactsPage() {
     }
     if (q.trim()) {
       out = suggestContact(q, out, Math.max(10, out.length), learnMap);
+      const bad = negativeMap[q];
+      if (bad) out = out.filter((c) => c.id !== bad);
     }
     return out;
-  }, [rows, q, learnMap, uiTick]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rows, q, learnMap, negativeMap, uiTick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function reinforce(id: string) {
     const next = learnContact(learnMap, q, id);
     setLearnMap(next);
     bus.emit('notify', {
       id: crypto.randomUUID(), text: 'AI learned this match', type: 'success',
+      createdAt: new Date().toISOString(),
+    });
+    // Mirror to server so other operators share the same learned ranking.
+    // Best-effort: failure should not block the local UX.
+    void api.learnContact({ query: q, contactId: id }).catch(() => { /* keep local-only */ });
+  }
+
+  function downrank(id: string) {
+    const next = { ...negativeMap, [q]: id };
+    setNegativeMap(next);
+    bus.emit('notify', {
+      id: crypto.randomUUID(), text: 'AI marked this as a poor match', type: 'info',
       createdAt: new Date().toISOString(),
     });
   }
@@ -412,7 +437,7 @@ export function ContactsPage() {
         </div>
 
         <div className="muted" style={{ marginTop: 6 }}>
-          {rows.length} contacts · {Object.keys(learnMap).length} learned mappings
+          {rows.length} contacts · {Object.keys(learnMap).length} learned mappings · {Object.keys(negativeMap).length} downranked
           {meta && ` · Sheet: ${new Date(meta.time).toLocaleString()} (${meta.count})`}
         </div>
 
@@ -456,9 +481,14 @@ export function ContactsPage() {
                   <td>{(c.ipPhone as string) || ''}</td>
                   <td onClick={(e) => e.stopPropagation()}>
                     {q.trim() && (
-                      <button className="btn ghost sm" onClick={() => reinforce(c.id)} title="Reinforce AI match">
-                        👍
-                      </button>
+                      <>
+                        <button className="btn ghost sm" onClick={() => reinforce(c.id)} title="Reinforce AI match">
+                          👍
+                        </button>{' '}
+                        <button className="btn ghost sm" onClick={() => downrank(c.id)} title="Mark as poor match">
+                          👎
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>

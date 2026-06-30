@@ -298,3 +298,114 @@ export interface BrasImportResult {
   updated: number;
   errors: { row: number; message: string }[];
 }
+
+export interface FetchedAddress {
+  name?: string;
+  address?: string;
+}
+
+export interface FetchedMail {
+  uid: number;
+  messageId: string | null;
+  subject: string;
+  from: FetchedAddress[];
+  to: FetchedAddress[];
+  cc: FetchedAddress[];
+  text: string;
+  html: string | null;
+  internalDate: string | null;
+  seen: boolean;
+  mailbox: string;
+}
+
+export interface FetchMailQuery {
+  /** ISO timestamp watermark. Omit to fetch the most recent messages. */
+  since?: string;
+  mailbox?: string;
+  limit?: number;
+}
+
+export interface FetchMailResponse {
+  rows: FetchedMail[];
+  total: number;
+}
+
+export interface MarkReadInput {
+  /** IMAP UID of the message to mark as read. */
+  uid: number;
+  /** Optional mailbox override; defaults to the server's MAIL_FETCH_BOX. */
+  mailbox?: string;
+}
+
+export interface DeleteMailInput {
+  uid: number;
+  /** Optional mailbox override; defaults to the server's MAIL_FETCH_BOX. */
+  mailbox?: string;
+}
+
+export interface ListMailQuery {
+  since?: string;
+  mailbox?: string;
+  limit?: number;
+}
+
+export interface ListMailResponse {
+  rows: FetchedMail[];
+  total: number;
+}
+
+export interface MailCountResponse {
+  mailbox: string;
+  total: number;
+}
+
+export interface TrainInput {
+  category: string;
+  department: string;
+  /** Free-text sub-category override. */
+  subCategory?: string;
+}
+
+export interface TrainResponse {
+  category: string;
+  department: string;
+  trainedAt: string;
+}
+
+export interface AttachmentMeta {
+  filename: string;
+  contentType: string;
+  size: number;
+  s3Key: string;
+}
+
+export interface ListAttachmentsResponse {
+  uid: number;
+  mailbox: string;
+  attachments: AttachmentMeta[];
+}
+
+export interface UploadResponse {
+  s3Key: string;
+  url: string;
+  size: number;
+  contentType: string;
+}
+
+// --- Azure AD / Entra ID SSO ------------------------------------------
+export interface AzureStatusResponse {
+  enabled: boolean;
+  redirectUri: string;
+}
+
+export interface AzureStartResponse {
+  url: string;
+  state: string;
+}
+
+export interface AzureProfile {
+  oid: string;
+  tid: string;
+  preferred_username: string;
+  name: string;
+}

@@ -24,6 +24,16 @@ import {
   type User,
 } from '@nmc/api-client';
 
+// Friendly message for the most common 401 cause: stale or empty user table
+// on the server (e.g. fresh clone of nmc.sqlite). Keeps the operator moving.
+function explainAuthError(err: unknown, fallback: string): string {
+  if (!isApiError(err)) return err instanceof Error ? err.message : fallback;
+  if (err.status === 401) {
+    return 'Sign-in failed: invalid email or password. (HTTP 401)';
+  }
+  return err.message || fallback;
+}
+
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
@@ -90,6 +100,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const session = await api.login({ username: email, password });
         applySession(session);
+      } catch (err) {
+        // A 401 from /api/auth/login means credentials were wrong — drop
+        // any stale token so the next attempt starts clean.
+        if (isApiError(err) && err.status === 401) {
+          await localStorageTokenStorage.clear();
+        }
+        throw new Error(explainAuthError(err, 'Login failed'));
       } finally {
         setLoading(false);
       }

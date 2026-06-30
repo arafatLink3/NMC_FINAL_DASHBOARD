@@ -1,27 +1,27 @@
 {
-  "name": "nmc-monorepo",
-  "private": true,
+  "name": "nmc-dashboard-monorepo",
   "version": "0.1.0",
-  "packageManager": "pnpm@11.8.0",
-  "engines": {
-    "node": ">=20.0.0"
-  },
+  "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @nmc/server dev & pnpm --filter @nmc/web dev",
-    "dev:server": "pnpm --filter @nmc/server dev",
-    "dev:web": "pnpm --filter @nmc/web dev",
-    "build": "pnpm -r run build",
-    "lint": "pnpm -r run lint",
-    "test": "pnpm -r run test",
-    "typecheck": "pnpm -r run typecheck",
-    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
-    "infra:down": "docker compose -f infra/docker-compose.yml down",
-    "infra:logs": "docker compose -f infra/docker-compose.yml logs -f"
+    "deploy": "node deploy.mjs",
+    "deploy:dry": "node deploy.mjs --dry-run",
+    "deploy:web": "node deploy.mjs --skip-server",
+    "deploy:server": "node deploy.mjs --skip-web",
+    "build:shared": "pnpm --filter @nmc/ai --filter @nmc/api-client --filter @nmc/store run build",
+    "build:web": "pnpm --filter @nmc/web run build",
+    "build:server": "pnpm --filter @nmc/server run build",
+    "build:all": "pnpm run build:shared && pnpm run build:web && pnpm run build:server",
+    "typecheck": "pnpm --filter @nmc/ai --filter @nmc/api-client --filter @nmc/store --filter @nmc/server --filter @nmc/web run typecheck",
+    "verify:deploy": "node verify-deploy.mjs",
+    "docker:build": "docker build -f server/Dockerfile -t nmc-server:dev .",
+    "docker:run": "docker run --rm -p 4000:4000 --env-file server/.env nmc-server:dev",
+    "docker:compose": "docker compose up --build",
+    "deploy:container": "node deploy.mjs --docker-server --container-only",
+    "deploy:full": "node deploy.mjs --docker-server"
   },
-  "devDependencies": {
-    "typescript": "5.5.4",
-    "@types/node": "20.14.10",
-    "prettier": "3.3.3",
-    "eslint": "9.9.0"
-  }
+  "engines": {
+    "node": ">=20.14.0"
+  },
+  "packageManager": "pnpm@9.0.0"
 }

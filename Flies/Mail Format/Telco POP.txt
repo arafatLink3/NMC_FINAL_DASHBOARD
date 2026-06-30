@@ -1,0 +1,89 @@
+BL: 
+
+TO :  NOCOutsource@banglalink.net; nmc@banglalinkgsm.com; soc@banglalink.net; SOCOutsource@banglalink.net; nmc@banglalink.net; blsoc@banglalink.net; mk.ali@blmanagedservices.com ; mohammad.pervez@banglalink.net; mohammad.pervez@banglalink.net; Transport_Wireless@banglalink.net; TSMOutsourced@banglalink.net;
+
+
+
+
+CC : nmc@link3.net; noc@link3.net; infrastructure@link3.net; mtarek@link3.net; Dehossain@banglalink.net; faiahmed@banglalink.net; FSalehin@banglalink.net; hazmi@blmanagedservices.com; naislam@banglalink.net; bsekendar@banglalink.net; shahahossain@banglalink.net; moanam@banglalink.net; jmistry@blmanagedservices.com; asmali@banglalink.net; ashaque@blmanagedservices.com; nuddin@blmanagedservices.com; j.hossin@blmanagedservices.com; Ckundu@banglalink.net; mm.khan@blmanagedservices.com; aalmamun@banglalink.net; naahmed@blmanagedservices.com; juddin@blmanagedservices.com; moabjabbar@banglalink.net; zahsan@banglalink.net; Mohaalam@banglalink.net; mmo.hossain@blmanagedservices.com; sbarua@blmanagedservices.com; r.morshed@blmanagedservices.com; ASiddiquee@banglalink.net; sm.ahmed@blmanagedservices.com; moniruzzaman@banglalink.net; al.helal@banglalink.net; sdas@banglalink.net; m.emon@banglalink.net; mu.hasan@blmanagedservices.com; hab.rahman@blmanagedservices.com; customersupport@link3.net;
+
+
+
+SUB: FON link down from Pabna (RAJ_X0422) - Kashinathpur (RAJ_X0108)
+Dear Concern,
+
+
+Route Name : Pabna (RAJ_X0422) - Kashinathpur (RAJ_X0108)
+Circuit Name : 000 FNFHR0422 - 000 FNFHR0108
+
+
+Down Time : 11:44 PM _ 07-April-26
+
+
+
+
+We are waiting for your response.
+
+
+
+
+GP:
+
+
+TO: gp.frontofficeran@zte.com.cn; mahmood.riaz@zte.com.cn; asim.kundu@zte.com.cn; 
+
+
+CC: rnbm_soc@grameenphone.com;  mostafizur.rahman@grameenphone.com; sziaul@grameenphone.com; Happy@grameenphone.com;  nmc@link3.net;  infrastructure@link3.net;  mtarek@link3.net; corenetwork@link3.net; ngnc@link3.net;  bnoc@link3.net;   transmission@link3.net;   (also Add Zonal Concern)
+
+
+
+
+SUB:  Regarding Ramgarh POP down
+Dear Concern,
+ 
+We are getting down Ramgarh POP from 13:39 to till now. Please check and let us know the update urgently.
+ 
+Transmission Route       : Chittagong(CGSLCT)-Ramgorh(CGGDD1)
+Dip Name                      : Link3_L2_CGSLCT_CGHTZ1
+LDP remote peer IP       : 10.252.1.23
+GP Router Interface       : 0/7/4.3109
+We are waiting for your reply.
+
+
+
+
+
+
+
+STL:
+
+
+Please be informed that for any issues related to STL site downtime or power outages.
+
+To:  "STL NOC" <noc.stl@summitcommunications.net>
+
+CC: "NMC" <nmc@link3.net>; "NGNC" <ngnc@link3.net>; "Transmission" <transmission@link3.net>; "SAT" <sat@link3.net>; "NMR" <nmr@link3.net>; "Wireless" <wireless@link3.net>; "Infrastructure" <infrastructure@link3.net>; "Bts" <bts@link3.net>; "Customer Support" <customersupport@link3.net>; "Tarekul Islam" <mtarek@link3.net>; "Tofayel Ahammed" <tofayel.ahammed@link3.net>, noc.nttn@summitcommunications.net
+
+
+
+Subject: Regarding STL Fulbaria POP down || SRMYPHB005
+
+
+Dear Concern,
+
+We are getting STL Fulbaria POP down from 15:00 to till now. Please check site downtime or power outages and let us know the update urgently.
+
+Site code: SRMYPHB005
+
+
+We are waiting for your reply.
+
+
+
+
+
+
+
+
+
+

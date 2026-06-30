@@ -1,0 +1,58 @@
+# .dockerignore — keeps the build context small and the cache stable.
+# Apply to the repo root (parent of this file).
+
+**/node_modules
+**/.pnpm-store
+**/dist
+**/.turbo
+**/.vite
+**/.cache
+**/.next
+
+# Never ship secrets or local env.
+.env
+.env.*
+!.env.example
+
+# Logs, telemetry, scratch.
+**/*.log
+**/logs
+**/coverage
+**/.nyc_output
+**/.vitest
+**/.vitest-cache
+**/tmp
+**/temp
+**/.DS_Store
+**/Thumbs.db
+
+# Tests, fixtures, docs that bloat the image.
+**/test
+**/tests
+**/__tests__
+**/__mocks__
+**/*.test.ts
+**/*.spec.ts
+**/*.test.tsx
+**/*.spec.tsx
+**/*.test.mjs
+**/*.spec.mjs
+**/*.test.js
+**/*.spec.js
+
+# Build artefacts that the runtime stage re-creates.
+**/*.tsbuildinfo
+**/.swc
+
+# Monorepo-level noise.
+.git
+.gitignore
+.github
+.gitattributes
+.vscode
+.idea
+*.md
+!server/README.md
+docs/
+incoming/
+Flies/

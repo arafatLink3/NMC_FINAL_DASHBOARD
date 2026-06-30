@@ -11,15 +11,23 @@ import { loadConfig } from './config.js';
 import { startTelemetry } from './telemetry.js';
 import { createDb } from './db.js';
 import { buildFastify } from './app.js';
+import { startScheduler } from './scheduler.js';
 
 async function main(): Promise<void> {
   const config = loadConfig();
   const stopTelemetry = startTelemetry(config);
   const db = createDb(config);
   const app = await buildFastify({ config, db });
+  const scheduler = startScheduler({
+    config,
+    db,
+    mailFetcher: app.mailFetcher,
+    mailer: app.mailer,
+  });
 
   const shutdown = async (signal: string): Promise<void> => {
     app.log.info({ signal }, 'shutting down');
+    try { scheduler.stop(); } catch { /* ignore */ }
     try {
       await app.close();
     } catch (err) {

@@ -4,6 +4,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { TicketsPage } from './pages/TicketsPage';
 import { IncidentLogPage } from './pages/IncidentLogPage';
 import { MailPage } from './pages/MailPage';
+import { MailInboxPage } from './pages/MailInboxPage';
 import { ContactsPage } from './pages/ContactsPage';
 import { ContactPage } from './pages/ContactPage';
 import { BrasPage } from './pages/BrasPage';
@@ -41,6 +42,7 @@ export function App() {
         <Route path="tickets" element={<TicketsPage />} />
         <Route path="incidentLog" element={<IncidentLogPage />} />
         <Route path="mail" element={<MailPage />} />
+        <Route path="mail/inbox" element={<MailInboxPage />} />
         <Route path="contacts" element={<ContactsPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="contact/:id" element={<ContactPage />} />

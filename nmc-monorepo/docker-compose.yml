@@ -1,0 +1,73 @@
+# docker-compose.yml — local development & smoke testing.
+# Mirrors the production topology: Fastify + Supabase Postgres + adminer.
+#
+# Bring up:  docker compose up --build
+# Tail logs: docker compose logs -f nmc-server
+# Tear down: docker compose down -v
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: nmc-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: nmc
+      POSTGRES_DB: nmc
+    ports:
+      - "5432:5432"
+    volumes:
+      - nmc-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nmc"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nmc-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: nmc-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      HOST: 0.0.0.0
+      LOG_LEVEL: info
+
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nmc
+      DB_USER: postgres
+      DB_PASSWORD: nmc
+
+      CORS_ORIGIN: http://localhost:5173
+      JWT_ACCESS_SECRET: dev-access-secret
+      JWT_REFRESH_SECRET: dev-refresh-secret
+
+      RUN_MIGRATIONS: "true"
+      RUN_SEED: "true"
+    ports:
+      - "4000:4000"
+    volumes:
+      - nmc-data:/app/data
+
+  adminer:
+    image: adminer:latest
+    container_name: nmc-adminer
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+volumes:
+  nmc-pg-data:
+  nmc-data:

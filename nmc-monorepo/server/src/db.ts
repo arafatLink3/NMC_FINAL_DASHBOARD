@@ -42,15 +42,28 @@ export function createDb(config: Config): Knex {
     });
   }
 
+  // Supabase first — a single DATABASE_URL is the easy button. Fall
+  // back to the explicit host/user/password fields when only those
+  // are set (self-hosted Postgres, Docker compose, etc.).
+  const connection = config.SUPABASE_DATABASE_URL
+    ? config.SUPABASE_DATABASE_URL
+    : {
+        host: config.DB_HOST,
+        port: config.DB_PORT,
+        database: config.DB_NAME,
+        user: config.DB_USER,
+        password: config.DB_PASSWORD,
+        // Reasonable SSL default for Supabase Pooler — disable when
+        // running against a plain local Postgres that does not have
+        // TLS by setting NMC_DB_SSL=disable.
+        ssl:
+          process.env.NMC_DB_SSL === 'disable'
+            ? false
+            : { rejectUnauthorized: false },
+      };
   return knexFactory({
     client: 'pg',
-    connection: {
-      host: config.DB_HOST,
-      port: config.DB_PORT,
-      database: config.DB_NAME,
-      user: config.DB_USER,
-      password: config.DB_PASSWORD,
-    },
+    connection,
     migrations: { directory: migrationsDir, loadExtensions: ['.js'] },
     pool: { min: 2, max: 10 },
   });

@@ -28,7 +28,10 @@ export function registerDomainRoutes(app: FastifyInstance, db: Knex): void {
     { table: 'roster_rows', prefix: '/api/roster' },
     { table: 'scr_rows', prefix: '/api/scr' },
     { table: 'ccb_rows', prefix: '/api/ccb' },
-    { table: 'mail_messages', prefix: '/api/mail' },
+    // mail_messages is exposed under `/api/mail/log` so the
+    // IMAP-fetched mail routes (`/api/mail/:uid`, `/api/mail/list`,
+    // `/api/mail/count`) keep `/api/mail/:uid` free of the auto-crud.
+    { table: 'mail_messages', prefix: '/api/mail/log' },
     { table: 'settings', prefix: '/api/settings' },
   ];
   for (const d of domains) registerCrud(app, db, d);
